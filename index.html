@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lernwortschatz</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
   <meta name="theme-color" content="#317EFB"/>
-  <link rel="icon" href="icon-192.png">
+  <link rel="icon" href="icons/android/android-launchericon-192-192.png">
+  <link rel="apple-touch-icon" href="icons/ios/180.png">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -17,12 +19,37 @@
 </head>
 <body>
   <div class="app">
-  <div class="dashboard">
-    <!-- Cards for Lessons -->
 
-        <div class="card" data-lesson="A2.9">
-      <h2>A2.9</h2>
-      <button class="study-btn" data-lesson="A2.9">Study</button>
+    <!-- Menu Button -->
+    <button id="menu-btn" style="position:absolute;top:16px;right:16px;font-size:2rem;background:none;border:none;cursor:pointer;z-index:10;">&#9776;</button>
+
+    <!-- Modal Menu -->
+    <div id="menu-modal" style="display:none;position:fixed;top:0;right:0;width:300px;max-width:90vw;height:100vh;background:#fff;box-shadow:-2px 0 8px rgba(0,0,0,0.1);z-index:100;flex-direction:column;padding:2rem;">
+      <button id="close-menu" style="position:absolute;top:10px;right:10px;font-size:1.5rem;background:none;border:none;cursor:pointer;">&times;</button>
+      <div class="level-selector" style="margin-bottom:2rem;">
+        <button class="level-btn" data-level="A1.1">A1.1</button>
+        <button class="level-btn" data-level="A1.2">A1.2</button>
+        <button class="level-btn" data-level="A2.1">A2.1</button>
+        <button class="level-btn" data-level="A2.2">A2.2</button>
+        <button class="level-btn" data-level="B1.1">B1.1</button>
+      </div>
+      <div class="language-selector" style="margin-bottom:2rem;">
+        <button class="language-btn" data-language="english">English</button>
+        <button class="language-btn" data-language="russian">Русский</button>
+        <button class="language-btn" data-language="romanian">Română</button>
+        <!-- Add more languages as needed -->
+      </div>
+      <button id="export-btn">Fortschritt exportieren</button>
+      <input type="file" id="import-input" style="display:none" accept=".json">
+      <button id="import-btn">Fortschritt importieren</button>
+    </div>
+
+    <div class="dashboard">
+      <!-- Cards for Lessons -->
+
+    <div class="card" data-lesson="A1.1">
+      <h2>A1.1</h2>
+      <button class="study-btn" data-lesson="A1.1">lernen</button>
       <div class="progress-tracks">
         <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
         <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
@@ -33,10 +60,295 @@
         <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
       </div>
     </div>
-
+    <div class="card" data-lesson="A1.2">
+      <h2>A1.2</h2>
+      <button class="study-btn" data-lesson="A1.2">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.3">
+      <h2>A1.3</h2>
+      <button class="study-btn" data-lesson="A1.3">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.4">
+      <h2>A1.4</h2>
+      <button class="study-btn" data-lesson="A1.4">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.5">
+      <h2>A1.5</h2>
+      <button class="study-btn" data-lesson="A1.5">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.6">
+      <h2>A1.6</h2>
+      <button class="study-btn" data-lesson="A1.6">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.7">
+      <h2>A1.7</h2>
+      <button class="study-btn" data-lesson="A1.7">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.8">
+      <h2>A1.8</h2>
+      <button class="study-btn" data-lesson="A1.8">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.9">
+      <h2>A1.9</h2>
+      <button class="study-btn" data-lesson="A1.9">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.10">
+      <h2>A1.10</h2>
+      <button class="study-btn" data-lesson="A1.10">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.11">
+      <h2>A1.11</h2>
+      <button class="study-btn" data-lesson="A1.11">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.12">
+      <h2>A1.12</h2>
+      <button class="study-btn" data-lesson="A1.12">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.13">
+      <h2>A1.13</h2>
+      <button class="study-btn" data-lesson="A1.13">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A1.14">
+      <h2>A1.14</h2>
+      <button class="study-btn" data-lesson="A1.14">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.1">
+      <h2>A2.1</h2>
+      <button class="study-btn" data-lesson="A2.1">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.2">
+      <h2>A2.2</h2>
+      <button class="study-btn" data-lesson="A2.2">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.3">
+      <h2>A2.3</h2>
+      <button class="study-btn" data-lesson="A2.3">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.4">
+      <h2>A2.4</h2>
+      <button class="study-btn" data-lesson="A2.4">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.5">
+      <h2>A2.5</h2>
+      <button class="study-btn" data-lesson="A2.5">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.6">
+      <h2>A2.6</h2>
+      <button class="study-btn" data-lesson="A2.6">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.7">
+      <h2>A2.7</h2>
+      <button class="study-btn" data-lesson="A2.7">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.8">
+      <h2>A2.8</h2>
+      <button class="study-btn" data-lesson="A2.8">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="A2.9">
+      <h2>A2.9</h2>
+      <button class="study-btn" data-lesson="A2.9">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
     <div class="card" data-lesson="A2.10">
       <h2>A2.10</h2>
-      <button class="study-btn" data-lesson="A2.10">Study</button>
+      <button class="study-btn" data-lesson="A2.10">lernen</button>
       <div class="progress-tracks">
         <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
         <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
@@ -47,9 +359,9 @@
         <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
       </div>
     </div>
-            <div class="card" data-lesson="A2.11">
+    <div class="card" data-lesson="A2.11">
       <h2>A2.11</h2>
-      <button class="study-btn" data-lesson="A2.11">Study</button>
+      <button class="study-btn" data-lesson="A2.11">lernen</button>
       <div class="progress-tracks">
         <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
         <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
@@ -60,9 +372,9 @@
         <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
       </div>
     </div>
-            <div class="card" data-lesson="A2.12">
+    <div class="card" data-lesson="A2.12">
       <h2>A2.12</h2>
-      <button class="study-btn" data-lesson="A2.12">Study</button>
+      <button class="study-btn" data-lesson="A2.12">lernen</button>
       <div class="progress-tracks">
         <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
         <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
@@ -75,7 +387,7 @@
     </div>
     <div class="card" data-lesson="A2.13">
       <h2>A2.13</h2>
-      <button class="study-btn" data-lesson="A2.13">Study</button>
+      <button class="study-btn" data-lesson="A2.13">lernen</button>
       <div class="progress-tracks">
         <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
         <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
@@ -86,10 +398,9 @@
         <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
       </div>
     </div>
-
-            <div class="card" data-lesson="A2.14">
+    <div class="card" data-lesson="A2.14">
       <h2>A2.14</h2>
-      <button class="study-btn" data-lesson="A2.14">Study</button>
+      <button class="study-btn" data-lesson="A2.14">lernen</button>
       <div class="progress-tracks">
         <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
         <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
@@ -100,29 +411,109 @@
         <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
       </div>
     </div>
-
-
-
-
-    
-
-    <!-- Add more lessons here as needed -->
+    <div class="card" data-lesson="B1.1">
+  <h2>B1.1</h2>
+  <button class="study-btn" data-lesson="B1.1">lernen</button>
+  <div class="progress-tracks">
+    <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+    <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+    <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+    <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+    <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+    <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+    <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+  </div>
+    </div>
+    <div class="card" data-lesson="B1.2">
+      <h2>B1.2</h2>
+      <button class="study-btn" data-lesson="B1.2">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="B1.3">
+      <h2>B1.3</h2>
+      <button class="study-btn" data-lesson="B1.3">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="B1.4">
+      <h2>B1.4</h2>
+      <button class="study-btn" data-lesson="B1.4">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="B1.5">
+      <h2>B1.5</h2>
+      <button class="study-btn" data-lesson="B1.5">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="B1.6">
+      <h2>B1.6</h2>
+      <button class="study-btn" data-lesson="B1.6">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+    <div class="card" data-lesson="B1.7">
+      <h2>B1.7</h2>
+      <button class="study-btn" data-lesson="B1.7">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
   </div>
 
   <div id="study-mode" style="display:none; position:relative;">
-    
      <div class="card" id="questions">
-       <button id="close-study" style="position:absolute;top:10px;right:10px;font-size:1.5rem;background:none;border:none;cursor:pointer;z-index:1;color:black">&times;</button>
-    <div class="question" id="card-container"></div>
-    <div class="answers" id="options-container" round=""></div>
-    <button id="next-btn" disabled>Next</button>
+      <button id="close-study" style="position:absolute;top:10px;right:10px;font-size:1.5rem;background:none;border:none;cursor:pointer;z-index:1;color:black">&times;</button>
+      <div class="question" id="card-container"></div>
+      <div class="answers" id="options-container" round=""></div>
+    <button id="next-btn" disabled>weiter</button>
+    </div>
+    <div id="progress-bar"></div>
   </div>
-  <div id="progress-bar">
-    
   </div>
-
-  </div>
-</div>
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
