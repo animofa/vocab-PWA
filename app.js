@@ -16,10 +16,10 @@ async function checkAndUpdateCache() {
       // Open new cache and add files
       const cache = await caches.open(CACHE_NAME);
       await cache.addAll([
-        '/manifest.json',
-        'icons/ios/180.png',
-        'icons/android/android-launchericon-192-192.png',
-        'icons/android/android-launchericon-512-512.png'
+        './manifest.json',
+        './icons/ios/180.png',
+        './icons/android/android-launchericon-192-192.png',
+        './icons/android/android-launchericon-512-512.png'
       ]);
     }
     localStorage.setItem('CACHE_NAME', CACHE_NAME);
