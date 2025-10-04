@@ -1,10 +1,11 @@
-const CACHE_NAME = 'vocab-pwa-v1'; // Change this version when you update files
+const CACHE_NAME = 'vocab-pwa-v1';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
       return cache.addAll([
-        './manifest.json',  
+        './index.html', // <-- Add index.html to cache!
+        './manifest.json',
         './icons/ios/180.png',
         './icons/android/android-launchericon-192-192.png',
         './icons/android/android-launchericon-512-512.png'
@@ -29,8 +30,12 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  if (event.request.method === 'GET' && !event.request.url.endsWith('.css') && !event.request.url.endsWith('.js')) {
-    event.respondWith(caches.match('/index.html'));
+  if (event.request.method === 'GET' && event.request.destination === 'document') {
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        return response || fetch(event.request);
+      })
+    );
   } else {
     event.respondWith(
       caches.match(event.request).then(function(response) {
