@@ -4,10 +4,10 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
       return cache.addAll([
-        '/manifest.json',
-        'icons/ios/180.png',
-        'icons/android/android-launchericon-192-192.png',
-        'icons/android/android-launchericon-512-512.png'
+        './manifest.json',  
+        './icons/ios/180.png',
+        './icons/android/android-launchericon-192-192.png',
+        './icons/android/android-launchericon-512-512.png'
       ]);
     })
   );
@@ -29,10 +29,15 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
-    })
-  );
+  if (event.request.method === 'GET' && !event.request.url.endsWith('.css') && !event.request.url.endsWith('.js')) {
+    event.respondWith(caches.match('/index.html'));
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        return response || fetch(event.request);
+      })
+    );
+  }
 });
+
 
