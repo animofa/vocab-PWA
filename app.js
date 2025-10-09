@@ -146,20 +146,21 @@ function reorderProgressBar() {
   }
 }
 
- function getPromotedRound(currentRound, lastSeenDate) {
+function getPromotedRound(currentRound, lastSeenDate) {
   const now = new Date();
   const daysElapsed = Math.floor((now - new Date(lastSeenDate)) / (1000 * 60 * 60 * 24));
 
-  // Find the highest round where delay_days <= daysElapsed
   let newRound = currentRound;
+
   for (let i = currentRound + 1; i <= roundConfiguration.length; i++) {
-    const cfg = roundConfiguration.find(r => r.round === i);
-    if (cfg && cfg.delay_days <= daysElapsed) {
+    const previousCfg = roundConfiguration.find(r => r.round === i - 1);
+    if (previousCfg && previousCfg.delay_days <= daysElapsed) {
       newRound = i;
     } else {
       break;
     }
   }
+
   return newRound;
 }
 
