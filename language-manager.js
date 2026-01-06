@@ -1,15 +1,11 @@
-const loaders = {
-  en: () => import("./en.js"),
-  de: () => import("./de.js"),
-  fr: () => import("./fr.js")
-};
-
 export async function loadVocabularyForLanguage(lang) {
-  if (!loaders[lang]) {
-    console.warn(`Unknown language "${lang}", falling back to en`);
-    lang = "en";
+  switch (lang) {
+    case "russian":
+      return (await import("./russian.js")).default;
+    case "portuguese":
+      return (await import("./portuguese.js")).default;
+    case "english":
+    default:
+      return (await import("./english.js")).default;
   }
-
-  const module = await loaders[lang]();
-  return module.default;
 }
