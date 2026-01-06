@@ -1,4 +1,4 @@
-import { vocabularies } from './vocabulary.js';
+import { loadVocabularyForLanguage } from './language-manager.js';
 
 const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
 
