@@ -1,4 +1,4 @@
-import { loadVocabularyForLanguage } from './language-manager.js';
+import { loadVocabularyForLanguage } from "./language-manager.js";
 
 const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
 
@@ -43,30 +43,12 @@ let currentLanguage = getSavedLanguage() || null;
 if (!currentLanguage) {
   document.getElementById('menu-modal').style.display = 'flex';
 }
+
 let vocabulary = [];
 
-async function initApp() {
-  const lang = getSavedLanguage() || "en";
+async function initVocabulary() {
+  const lang = currentLanguage || "en";
   vocabulary = await loadVocabularyForLanguage(lang);
-
-  // everything that depends on vocabulary starts here
-  await openDatabase();
-  const loaded = await loadCardRound();
-  cardRound = loaded;
-
-  let allCards = vocabulary.map(card => {
-    const saved = cardRound[card.back] || {};
-    return {
-      ...card,
-      round: saved.round ?? 0,
-      lastSeen: saved.lastSeen || null,
-      status: null
-    };
-  });
-
-  cards = shuffle(allCards.filter(isCardDue));
-  loadBatch(batchIndex);
-  showDashboard();
 }
 
 
@@ -605,28 +587,26 @@ function isCardDue(card) {
 
 let cardRound = {};
 
-openDatabase().then(() => {
-  return loadCardRound();
-}).then((loaded) => {
-  cardRound = loaded;
+openDatabase()
+  .then(initVocabulary)
+  .then(loadCardRound)
+  .then((loaded) => {
+    cardRound = loaded;
 
-  // ⬇️ Now proceed to map cards and initialize your app
-  let allCards = vocabulary.map(card => {
-    const saved = cardRound[card.back] || {};
-    return {
-      ...card,
-      round: saved.round ?? 0,
-      lastSeen: saved.lastSeen || null,
-      status: null
-    };
+    let allCards = vocabulary.map(card => {
+      const saved = cardRound[card.back] || {};
+      return {
+        ...card,
+        round: saved.round ?? 0,
+        lastSeen: saved.lastSeen || null,
+        status: null
+      };
+    });
+
+    cards = shuffle(allCards.filter(isCardDue));
+    loadBatch(batchIndex);
+    showDashboard();
   });
-
-  // Filter & shuffle
-  cards = shuffle(allCards.filter(isCardDue));
-
-  loadBatch(batchIndex);
-  showDashboard();
-});
 
 
 let allCards = vocabulary.map(card => {
