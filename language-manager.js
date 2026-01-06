@@ -1,13 +1,13 @@
 export async function loadVocabularyForLanguage(lang) {
   switch (lang) {
     case "russian":
-      return (await import("./russian.js")).default;
+      return (await import("./languages/russian.js")).default;
     case "romanian":
-      return (await import("./romanian.js")).default;
+      return (await import("./languages/romanian.js")).default;
     case "portuguese":
-      return (await import("./portuguese.js")).default;
+      return (await import("./languages/portuguese.js")).default;
     case "english":
     default:
-      return (await import("./english.js")).default;
+      return (await import("./languages/english.js")).default;
   }
 }
