@@ -43,7 +43,32 @@ let currentLanguage = getSavedLanguage() || null;
 if (!currentLanguage) {
   document.getElementById('menu-modal').style.display = 'flex';
 }
-let vocabulary = vocabularies[currentLanguage || 'en'];
+let vocabulary = [];
+
+async function initApp() {
+  const lang = getSavedLanguage() || "en";
+  vocabulary = await loadVocabularyForLanguage(lang);
+
+  // everything that depends on vocabulary starts here
+  await openDatabase();
+  const loaded = await loadCardRound();
+  cardRound = loaded;
+
+  let allCards = vocabulary.map(card => {
+    const saved = cardRound[card.back] || {};
+    return {
+      ...card,
+      round: saved.round ?? 0,
+      lastSeen: saved.lastSeen || null,
+      status: null
+    };
+  });
+
+  cards = shuffle(allCards.filter(isCardDue));
+  loadBatch(batchIndex);
+  showDashboard();
+}
+
 
 // Add event listeners to language buttons
 document.querySelectorAll('.language-btn').forEach(btn => {
