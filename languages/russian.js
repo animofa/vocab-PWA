@@ -5515,8 +5515,8 @@ const vocabulary = [
 { front: "континент", back: "der Kontinent", lesson: "B1.14" },	{ front: "континенты", back: "die Kontinente", lesson: "B1.14" },
 { front: "Европейский Союз", back: "die EU", lesson: "B1.14" },	{ front: "–", back: "–", lesson: "B1.14" },
 { front: "свобода", back: "die Freiheit", lesson: "B1.14" },	{ front: "свободы", back: "die Freiheiten", lesson: "B1.14" },
-{ front: "демократия", back: "die Demokratie", lesson: "" },	{ front: "демократии", back: "die Demokratien", lesson: "" },
-{ front: "иммигрант", back: "der Zuwanderer", lesson: "" },	{ front: "иммигранты", back: "die Zuwanderer", lesson: "" }
+{ front: "демократия", back: "die Demokratie", lesson: "B1.14" },	{ front: "демократии", back: "die Demokratien", lesson: "B1.14" },
+{ front: "иммигрант", back: "der Zuwanderer", lesson: "B1.14" },	{ front: "иммигранты", back: "die Zuwanderer", lesson: "B1.14" }
 ];
 
 export default vocabulary;
