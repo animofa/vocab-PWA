@@ -786,6 +786,8 @@ function showLessonsForLevel(level) {
       show = /^A2\.(8|9|10|11|12|13|14)$/.test(lesson);
     } else if (level === 'B1.1') {
       show = /^B1\.[1-7]$/.test(lesson);
+    } else if (level === 'B1.2') {
+      show = /^B1\.(8|9|10|11|12|13|14)$/.test(lesson);
     }
     card.style.display = show ? '' : 'none';
   });
