@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lernwortschatz</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="icons/android/android-launchericon-192-192.png">
+  <link rel="apple-touch-icon" href="icons/ios/180.png">
+  <meta name="theme-color" content="#E8EBF3"/>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('service-worker.js');
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Menu Button -->
+    <button id="menu-btn" style="position:absolute;top:16px;right:16px;font-size:2rem;background:none;border:none;cursor:pointer;z-index:10;">&#9776;</button>
+
+    <!-- Modal Menu -->
+    <div id="menu-modal" style="display:none;position:fixed;top:0;right:0;width:300px;max-width:90vw;height:100vh;background:#fff;box-shadow:-2px 0 8px rgba(0,0,0,0.1);z-index:100;flex-direction:column;padding:2rem;">
+      <button id="close-menu" style="position:absolute;top:10px;right:10px;font-size:1.5rem;background:none;border:none;cursor:pointer;">&times;</button>
+
+      <button id="export-btn">Fortschritt exportieren</button>
+      <input type="file" id="import-input" style="display:none" accept=".json">
+      <button id="import-btn">Fortschritt importieren</button>
+    </div>
+
+    <div class="dashboard">
+      <!-- Cards for Lessons -->
+
+    <div class="card" data-lesson="J18Le8tmVs0">
+      <h2>Un petit pas</h2>
+      <button class="study-btn" data-lesson="J18Le8tmVs0">lernen</button>
+      <div class="progress-tracks">
+        <div class="progress-track" data-round="1"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="2"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="3"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="4"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="5"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="6"><div class="progress-fill"></div></div>
+        <div class="progress-track" data-round="7"><div class="progress-fill"></div></div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+  </div>
+
+  <div id="study-mode" style="display:none; position:relative;">
+     <div class="card" id="questions">
+      <button id="close-study" style="position:absolute;top:10px;right:10px;font-size:1.5rem;background:none;border:none;cursor:pointer;z-index:1;color:black">&times;</button>
+      <div class="question" id="card-container"></div>
+      <div class="answers" id="options-container" round=""></div>
+    <button id="next-btn" disabled>weiter</button>
+    </div>
+    <div id="progress-bar"></div>
+  </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
