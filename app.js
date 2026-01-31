@@ -801,8 +801,8 @@ function showLessonsForLevel(level) {
       show = /^B1\.[1-7]$/.test(lesson);
     } else if (level === 'B1.2') {
       show = /^B1\.(8|9|10|11|12|13|14)$/.test(lesson);
-    } else if (level === 'french') {
-      show = /^fr/i.test(lesson);
+    } else if (level === 'fr') {
+      show = lesson.startsWith('fr.');
     }
     card.style.display = show ? '' : 'none';
   });
