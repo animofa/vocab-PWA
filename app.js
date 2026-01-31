@@ -836,6 +836,17 @@ document.querySelectorAll('.level-btn').forEach(btn => {
     // Add .active to the clicked button
     this.classList.add('active');
     showLessonsForLevel(this.getAttribute('data-level'));
+
+    if (isFrenchMode) {
+      saveLevel('fr');
+      showLessonsForLevel('fr');
+
+      document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+      const frBtn = document.querySelector('.level-btn[data-level="fr"]');
+      if (frBtn) frBtn.classList.add('active');
+    }
+
+
     saveLevel(this.getAttribute('data-level'));
     // Close menu after selection
     document.getElementById('menu-modal').style.display = 'none';
