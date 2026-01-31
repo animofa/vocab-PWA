@@ -1,6 +1,9 @@
 import { loadVocabularyForLanguage } from "./language-manager.js";
 
 const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
+// Detect mode from URL
+const isFrenchMode = window.location.pathname.startsWith('/french');
+
 
 async function checkAndUpdateCache() {
   const storedCacheName = localStorage.getItem('CACHE_NAME');
@@ -39,10 +42,17 @@ function saveLanguage(lang) {
 }
 
 // Get current language or default to 'en'
-let currentLanguage = getSavedLanguage() || null;
-if (!currentLanguage) {
-  document.getElementById('menu-modal').style.display = 'flex';
+let currentLanguage;
+
+if (isFrenchMode) {
+  currentLanguage = 'french'; // 👈 fixed language
+} else {
+  currentLanguage = getSavedLanguage() || null;
+  if (!currentLanguage) {
+    document.getElementById('menu-modal').style.display = 'flex';
+  }
 }
+
 
 let vocabulary = [];
 
@@ -53,14 +63,17 @@ async function initVocabulary() {
 
 
 // Add event listeners to language buttons
-document.querySelectorAll('.language-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    saveLanguage(this.getAttribute('data-language'));
-    location.reload(); // reload to apply new language
+if (!isFrenchMode) {
+  document.querySelectorAll('.language-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      saveLanguage(this.getAttribute('data-language'));
+      location.reload();
+    });
   });
-});
+}
+
 
 // Highlight selected language on load
 if (currentLanguage) {
