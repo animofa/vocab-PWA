@@ -801,6 +801,8 @@ function showLessonsForLevel(level) {
       show = /^B1\.[1-7]$/.test(lesson);
     } else if (level === 'B1.2') {
       show = /^B1\.(8|9|10|11|12|13|14)$/.test(lesson);
+    } else if (level === 'B2.1') {
+      show = /^B2\.(1|2|3|4|5|6)$/.test(lesson);
     } else if (level === 'fr') {
       show = lesson.startsWith('fr.');
     }
