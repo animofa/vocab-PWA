@@ -298,7 +298,7 @@ const vocabulary = [
 { front: "vidéo", back: "Video", lesson: "2Bsmx374r1A" },
 { front: "voulons", back: "wollen", lesson: "2Bsmx374r1A" },
 { front: "vêtements", back: "Kleidung", lesson: "2Bsmx374r1A" },
-{ front: "week-ends", back: "Wochenenden", lesson: "2Bsmx374r1A" },
+{ front: "week-ends", back: "Wochenenden", lesson: "2Bsmx374r1A" }, 
 
 { front: "après", back: "nach", lesson: "tbJ8JDR8dyE" },
 { front: "avoir l’air", back: "Aussehen", lesson: "tbJ8JDR8dyE" },
