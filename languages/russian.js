@@ -5180,7 +5180,7 @@ const vocabulary = [
 					
 					
 					
-{ front: "präteritum ich vergrößern", back: "ich vergrößerte mich", lesson: "B1.7" },	{ front: "präteritum du vergrößern", back: "du vergrößertest dich", lesson: "B1.7" },	{ front: "präteritum  sie vergrößern", back: "sie vergrößerte sich", lesson: "B1.7" },	{ front: "präteritum wir vergrößern", back: "wir vergrößerten uns", lesson: "B1.7" },	{ front: "präteritum ihr vergrößern", back: "ihr vergrößertet euch", lesson: "B1.7" },	{ front: "präteritum sie(pl.) vergrößern", back: "sie vergrößerten sich", lesson: "B1.7" }
+{ front: "präteritum ich vergrößern", back: "ich vergrößerte mich", lesson: "B1.7" },	{ front: "präteritum du vergrößern", back: "du vergrößertest dich", lesson: "B1.7" },	{ front: "präteritum  sie vergrößern", back: "sie vergrößerte sich", lesson: "B1.7" },	{ front: "präteritum wir vergrößern", back: "wir vergrößerten uns", lesson: "B1.7" },	{ front: "präteritum ihr vergrößern", back: "ihr vergrößertet euch", lesson: "B1.7" },	{ front: "präteritum sie(pl.) vergrößern", back: "sie vergrößerten sich", lesson: "B1.7" },
 { front: "спортсмен", back: "der Sportler", lesson: "B1.8" },	{ front: "спортсмены", back: "die Sportler", lesson: "B1.8" },
 { front: "спортсменка", back: "die Sportlerin", lesson: "B1.8" },	{ front: "спортсменки", back: "die Sportlerinnen", lesson: "B1.8" },
 { front: "если", back: "falls", lesson: "B1.8" },	{ front: "–", back: "–", lesson: "B1.8" },
