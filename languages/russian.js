@@ -5215,7 +5215,7 @@ const vocabulary = [
 { front: "стихотворение", back: "das Gedicht", lesson: "B1.8" },	{ front: "стихотворения", back: "die Gedichte", lesson: "B1.8" },
 { front: "верный", back: "treu", lesson: "B1.8" },	{ front: "–", back: "–", lesson: "B1.8" },
 { front: "оркестр", back: "das Orchester", lesson: "B1.8" },	{ front: "–", back: "–", lesson: "B1.8" },
-{ front: "обращаться на "ты"", back: "duzen", lesson: "B1.8" },	{ front: "обращались на "ты"", back: "haben geduzt", lesson: "B1.8" },
+{ front: "обращаться на 'ты'", back: "duzen", lesson: "B1.8" },	{ front: "обращались на 'ты'", back: "haben geduzt", lesson: "B1.8" },
 { front: "родительское собрание", back: "der Elternabend", lesson: "B1.8" },	{ front: "родительские собрания", back: "die Elternabende", lesson: "B1.8" },
 { front: "правильный / довольно", back: "recht", lesson: "B1.8" },	{ front: "–", back: "–", lesson: "B1.8" },
 { front: "реклама", back: "die Werbung", lesson: "B1.8" },	{ front: "–", back: "–", lesson: "B1.8" },
