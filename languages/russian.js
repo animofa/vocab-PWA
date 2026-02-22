@@ -5227,7 +5227,7 @@ const vocabulary = [
 { front: "впечатление", back: "der Eindruck", lesson: "B1.8" },	{ front: "впечатления", back: "die Eindrücke", lesson: "B1.8" },
 { front: "рабочая атмосфера", back: "das Betriebsklima", lesson: "B1.8" },	{ front: "–", back: "–", lesson: "B1.8" },
 { front: "рабочая атмосфера", back: "die Arbeitsatmosphäre", lesson: "B1.9" },	{ front: "–", back: "–", lesson: "B1.9" },
-{ front: "обращаться на "Вы"", back: "siezen", lesson: "B1.9" },	{ front: "обращались на "Вы"", back: "haben gesiezt", lesson: "B1.9" },
+{ front: "обращаться на 'Вы'", back: "siezen", lesson: "B1.9" },	{ front: "обращались на 'Вы'", back: "haben gesiezt", lesson: "B1.9" },
 { front: "виртуальный", back: "virtuell", lesson: "B1.9" },	{ front: "–", back: "–", lesson: "B1.9" },
 { front: "папка", back: "der Ordner", lesson: "B1.9" },	{ front: "папки", back: "die Ordner", lesson: "B1.9" },
 { front: "жёсткий диск", back: "die Festplatte", lesson: "B1.9" },	{ front: "жёсткие диски", back: "die Festplatten", lesson: "B1.9" },
