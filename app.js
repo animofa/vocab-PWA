@@ -927,7 +927,7 @@ function stopAudioMode() {
 }
 
 ////////////////////////////////////////////////////////////
-// 🎧 AUDIO BUTTON LISTENER
+// 🎧 AUDIO BUTTON — LOAD SAME CARDS AS STUDY MODE
 ////////////////////////////////////////////////////////////
 
 document.querySelectorAll('.audio-btn').forEach(btn => {
@@ -941,16 +941,31 @@ document.querySelectorAll('.audio-btn').forEach(btn => {
       return;
     }
 
-    // Get all vocabulary for that lesson
-    const lessonCards = vocabulary.filter(card => card.lesson === lesson);
+    // Load round data
+    const cardRoundData = await loadCardRound();
 
-    if (!lessonCards.length) {
-      console.log("No vocabulary found for lesson:", lesson);
+    // Build full lesson card set (same as study mode)
+    let allCards = vocabulary
+      .filter(card => card.lesson === lesson)
+      .map(card => {
+        const saved = cardRoundData[card.back] || {};
+        return {
+          ...card,
+          round: saved.round ?? 0,
+          lastSeen: saved.lastSeen || null,
+          status: null
+        };
+      });
+
+    // ✅ Use same due logic as study mode
+    let dueCards = shuffle(allCards.filter(isCardDue));
+
+    if (!dueCards.length) {
+      console.log("No due cards for audio mode.");
       return;
     }
 
-    audioQueue = lessonCards;
-    currentAudioIndex = 0;
+    audioQueue = dueCards;
 
     runAudioQueue();
   });
