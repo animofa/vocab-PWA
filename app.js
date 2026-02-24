@@ -875,7 +875,7 @@ let currentAudioIndex = 0;
 
 // --- HARDCODED VOICE NAMES ---
 // You can console.log(synth.getVoices()) once to see exact names on your iPhone
-const FRONT_VOICE_NAME = "Samantha";   // e.g. English
+const FRONT_VOICE_NAME = "Anna";   // e.g. English
 const BACK_VOICE_NAME  = "Thomas";     // e.g. French
 
 function getVoiceByName(name) {
