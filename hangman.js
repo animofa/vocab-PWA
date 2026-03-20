@@ -1,16 +1,7 @@
 ////////////////////////////////////////////////////////////
-// 🎯 HANGMAN MODE (SELF-CONTAINED)
+// 🎯 HANGMAN MODE (EXPORTED FUNCTION)
 ////////////////////////////////////////////////////////////
 
-// --- Dependencies injected from app.js ---
-let vocabulary = [];
-let cardRound = {};
-let isCardDue = () => true;
-let getPromotedRound = (r) => r;
-let saveCardRound = () => {};
-let showStudyMode = () => {};
-
-// --- Game state ---
 let currentIndex = 0;
 let cards = [];
 let mistakes = 0;
@@ -19,79 +10,43 @@ const MAX_MISTAKES = 6;
 let currentWord = "";
 let guessedLetters = [];
 
-// --- DOM ---
+// DOM
 let container;
 let wordDisplay;
 let input;
 let info;
 let nextBtn;
 
-////////////////////////////////////////////////////////////
-// 🚀 INIT (MAIN EXPORT)
-////////////////////////////////////////////////////////////
-
-export function initHangman(deps = {}) {
-  // Defensive assignment (prevents undefined crashes)
-  vocabulary = deps.vocabulary || [];
-  cardRound = deps.cardRound || {};
-  isCardDue = deps.isCardDue || isCardDue;
-  getPromotedRound = deps.getPromotedRound || getPromotedRound;
-  saveCardRound = deps.saveCardRound || saveCardRound;
-  showStudyMode = deps.showStudyMode || showStudyMode;
-
-  attachButtonListeners();
-}
+// Dependencies (passed from app.js)
+let getPromotedRound;
+let saveCardRound;
+let cardRound;
 
 ////////////////////////////////////////////////////////////
-// 🎯 BUTTON LISTENER
+// 🚀 MAIN EXPORT
 ////////////////////////////////////////////////////////////
 
-function attachButtonListeners() {
-  const buttons = document.querySelectorAll('.hangman-btn');
-
-  if (!buttons.length) {
-    console.warn("No .hangman-btn found");
-    return;
-  }
-
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lesson = btn.getAttribute('data-lesson');
-
-      const lessonCards = vocabulary
-        .filter(card => card.lesson === lesson)
-        .map(card => {
-          const saved = cardRound[card.back] || {};
-          return {
-            ...card,
-            round: saved.round ?? 0,
-            lastSeen: saved.lastSeen || null
-          };
-        })
-        .filter(card => isCardDue(card));
-
-      if (!lessonCards.length) {
-        alert("No due cards for Hangman!");
-        return;
-      }
-
-      startGame(lessonCards);
-      showStudyMode();
-    });
-  });
-}
-
-////////////////////////////////////////////////////////////
-// 🎮 GAME LOGIC
-////////////////////////////////////////////////////////////
-
-function startGame(inputCards) {
+export function startHangmanGame({
+  cards: inputCards,
+  getPromotedRound: promoteFn,
+  saveCardRound: saveFn,
+  cardRound: roundStore
+}) {
+  // Assign dependencies
   cards = [...inputCards];
   currentIndex = 0;
+
+  getPromotedRound = promoteFn;
+  saveCardRound = saveFn;
+  cardRound = roundStore;
 
   setupUI();
   loadWord();
 }
+
+////////////////////////////////////////////////////////////
+// 🎮 UI SETUP
+////////////////////////////////////////////////////////////
 
 function setupUI() {
   container = document.getElementById("card-container");
@@ -128,6 +83,10 @@ function setupUI() {
   nextBtn.addEventListener("click", nextWord);
 }
 
+////////////////////////////////////////////////////////////
+// 🔤 LOAD WORD
+////////////////////////////////////////////////////////////
+
 function loadWord() {
   if (currentIndex >= cards.length) {
     container.textContent = "Hangman session complete!";
@@ -149,6 +108,10 @@ function loadWord() {
   updateInfo();
 }
 
+////////////////////////////////////////////////////////////
+// 🧩 RENDERING
+////////////////////////////////////////////////////////////
+
 function renderWord() {
   const display = currentWord
     .split("")
@@ -164,6 +127,10 @@ function renderWord() {
 function updateInfo() {
   info.textContent = `Mistakes: ${mistakes} / ${MAX_MISTAKES}`;
 }
+
+////////////////////////////////////////////////////////////
+// ⌨ INPUT HANDLING
+////////////////////////////////////////////////////////////
 
 function handleInput(e) {
   if (e.key !== "Enter") return;
@@ -185,6 +152,10 @@ function handleInput(e) {
   checkGameState();
 }
 
+////////////////////////////////////////////////////////////
+// 🧠 GAME STATE
+////////////////////////////////////////////////////////////
+
 function checkGameState() {
   const isWordComplete = currentWord
     .split("")
@@ -199,12 +170,15 @@ function checkGameState() {
   }
 }
 
+////////////////////////////////////////////////////////////
+// ✅ SUCCESS
+////////////////////////////////////////////////////////////
+
 function handleSuccess(card) {
   info.textContent = `✅ Correct! Word: ${card.back}`;
   input.disabled = true;
   nextBtn.style.display = "block";
 
-  // Promote round
   card.round = getPromotedRound(card.round, card.lastSeen);
   card.lastSeen = new Date().toISOString();
 
@@ -216,17 +190,24 @@ function handleSuccess(card) {
   saveCardRound(cardRound);
 }
 
+////////////////////////////////////////////////////////////
+// ❌ FAIL
+////////////////////////////////////////////////////////////
+
 function handleFail(card) {
   info.textContent = `❌ Failed! Word was: ${card.back}`;
   input.disabled = true;
   nextBtn.style.display = "block";
 
-  // Reinsert card later
   setTimeout(() => {
     const insertAt = Math.min(currentIndex + 2, cards.length);
     cards.splice(insertAt, 0, card);
   }, 300);
 }
+
+////////////////////////////////////////////////////////////
+// ➡ NEXT WORD
+////////////////////////////////////////////////////////////
 
 function nextWord() {
   currentIndex++;
