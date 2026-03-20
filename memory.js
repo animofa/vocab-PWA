@@ -90,9 +90,17 @@ function startMemoryGameFromCurrent() {
 ////////////////////////////////////////////////////////////
 
 function createMemoryCards(vocab) {
+  const MAX_WORDS = 8;
+
+  // Shuffle first so selection is random
+  const shuffled = shuffle([...vocab]);
+
+  // Take only 8 words
+  const limited = shuffled.slice(0, MAX_WORDS);
+
   let cards = [];
 
-  vocab.forEach(card => {
+  limited.forEach(card => {
     cards.push(
       { text: card.front, pairId: card.back },
       { text: card.back, pairId: card.back }
