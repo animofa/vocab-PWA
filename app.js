@@ -966,7 +966,7 @@ document.querySelectorAll('.memory-btn').forEach(btn => {
     startMemoryGame(lessonVocab);
   });
 });
-
+export { getPromotedRound, saveCardRound, loadCardRound };
 export function getVocabularyForLesson(lesson) {
   return vocabulary.filter(card => card.lesson === lesson);
 }

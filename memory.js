@@ -1,4 +1,6 @@
-// memory.js
+import { getPromotedRound, saveCardRound, loadCardRound } from "./app.js";
+
+let cardRound = {};
 
 let currentCards = [];
 let firstCard = null;
@@ -8,16 +10,24 @@ let moves = 0;
 let matches = 0;
 
 ////////////////////////////////////////////////////////////
-// 🚀 ENTRY POINT (called from app.js)
+// 🚀 ENTRY POINT
 ////////////////////////////////////////////////////////////
 
-export function startMemoryGame(vocabulary) {
+export async function startMemoryGame(vocabulary) {
   if (!vocabulary || !vocabulary.length) {
     console.log("No vocabulary provided to memory game");
     return;
   }
 
   injectMemoryHTML();
+
+  // Load spaced repetition progress
+  cardRound = await loadCardRound();
+
+  // Reset promotion flags (important on restart)
+  vocabulary.forEach(card => {
+    card._memoryPromoted = false;
+  });
 
   currentCards = createMemoryCards(vocabulary);
 
@@ -59,17 +69,14 @@ function injectMemoryHTML() {
 
   container.style.display = "block";
 
-  // Hide dashboard if exists
   const dashboard = document.querySelector('.dashboard');
   if (dashboard) dashboard.style.display = 'none';
 
-  // Close button
   document.getElementById("close-memory").onclick = () => {
     container.style.display = "none";
     if (dashboard) dashboard.style.display = '';
   };
 
-  // Restart button
   document.getElementById("restart-memory").onclick = () => {
     startMemoryGameFromCurrent();
   };
@@ -81,6 +88,12 @@ function injectMemoryHTML() {
 
 function startMemoryGameFromCurrent() {
   currentCards = shuffle(currentCards);
+
+  // reset promotion flags again
+  currentCards.forEach(c => {
+    if (c.original) c.original._memoryPromoted = false;
+  });
+
   resetGameState();
   renderMemoryGame();
 }
@@ -92,18 +105,15 @@ function startMemoryGameFromCurrent() {
 function createMemoryCards(vocab) {
   const MAX_WORDS = 8;
 
-  // Shuffle first so selection is random
   const shuffled = shuffle([...vocab]);
-
-  // Take only 8 words
-  const limited = shuffled.slice(0, MAX_WORDS);
+  const limited = shuffled.slice(0, Math.min(MAX_WORDS, shuffled.length));
 
   let cards = [];
 
   limited.forEach(card => {
     cards.push(
-      { text: card.front, pairId: card.back },
-      { text: card.back, pairId: card.back }
+      { text: card.front, pairId: card.back, original: card },
+      { text: card.back, pairId: card.back, original: card }
     );
   });
 
@@ -149,6 +159,9 @@ function renderMemoryGame() {
     el.dataset.text = card.text;
     el.dataset.pairId = card.pairId;
 
+    // ✅ CRITICAL FIX: attach original card
+    el.original = card.original;
+
     el.addEventListener("click", () => onCardClick(el));
 
     grid.appendChild(el);
@@ -187,12 +200,21 @@ function checkMatch() {
     firstCard.dataset.pairId === secondCard.dataset.pairId;
 
   if (isMatch) {
+    const card = firstCard.original;
+
+    // ✅ prevent multiple promotions per session
+    if (!card._memoryPromoted) {
+      updateCardProgress(card);
+      card._memoryPromoted = true;
+    }
+
     matches++;
     resetTurn();
 
     if (matches === currentCards.length / 2) {
       showWinMessage();
     }
+
   } else {
     setTimeout(() => {
       hideCard(firstCard);
@@ -220,6 +242,36 @@ function resetTurn() {
   firstCard = null;
   secondCard = null;
   lockBoard = false;
+}
+
+////////////////////////////////////////////////////////////
+// 📈 SPACED REPETITION UPDATE
+////////////////////////////////////////////////////////////
+
+function updateCardProgress(card) {
+  const saved = cardRound[card.back] || {};
+
+  const currentRound = saved.round ?? card.round ?? 0;
+  const lastSeen = saved.lastSeen || card.lastSeen || new Date().toISOString();
+
+  let newRound;
+
+  if (currentRound === 0) {
+    newRound = 1;
+  } else {
+    newRound = getPromotedRound(currentRound, lastSeen);
+  }
+
+  const now = new Date().toISOString();
+
+  cardRound[card.back] = {
+    round: newRound,
+    lastSeen: now
+  };
+
+  saveCardRound(cardRound);
+
+  console.log(`Memory promoted: ${card.back} → Round ${newRound}`);
 }
 
 ////////////////////////////////////////////////////////////
