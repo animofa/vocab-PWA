@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////
-// 🎯 HANGMAN MODE (EXPORTED FUNCTION + BUTTON LISTENER)
+// 🎯 HANGMAN MODE (PURE GAME MODULE)
 ////////////////////////////////////////////////////////////
 
 // --- Game state ---
@@ -19,72 +19,12 @@ let info;
 let nextBtn;
 
 // --- Dependencies (from app.js) ---
-let vocabulary = [];
-let cardRound = {};
-let isCardDue;
 let getPromotedRound;
 let saveCardRound;
-let showStudyMode;
+let cardRound;
 
 ////////////////////////////////////////////////////////////
-// 🚀 INIT (CALL THIS FROM app.js ONCE)
-////////////////////////////////////////////////////////////
-
-export function initHangman(deps) {
-  vocabulary = deps.vocabulary;
-  cardRound = deps.cardRound;
-  isCardDue = deps.isCardDue;
-  getPromotedRound = deps.getPromotedRound;
-  saveCardRound = deps.saveCardRound;
-  showStudyMode = deps.showStudyMode;
-
-  attachButtonListeners();
-}
-
-////////////////////////////////////////////////////////////
-// 🎯 BUTTON LISTENER (NOW INSIDE THIS FILE)
-////////////////////////////////////////////////////////////
-
-function attachButtonListeners() {
-  document.querySelectorAll('.hangman-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      console.log("Hangman button clicked");
-
-      const lesson = btn.getAttribute('data-lesson');
-
-      const lessonCards = vocabulary
-        .filter(card => card.lesson === lesson)
-        .map(card => {
-          const saved = cardRound[card.back] || {};
-          return {
-            ...card,
-            round: saved.round ?? 0,
-            lastSeen: saved.lastSeen || null
-          };
-        })
-        .filter(card => isCardDue(card));
-
-      console.log("Hangman cards:", lessonCards);
-
-      if (!lessonCards.length) {
-        alert("No due cards for Hangman!");
-        return;
-      }
-
-      startHangmanGame({
-        cards: lessonCards,
-        getPromotedRound,
-        saveCardRound,
-        cardRound
-      });
-
-      showStudyMode();
-    });
-  });
-}
-
-////////////////////////////////////////////////////////////
-// 🚀 MAIN GAME EXPORT (CAN STILL BE USED DIRECTLY)
+// 🚀 MAIN EXPORT (ONLY ENTRY POINT)
 ////////////////////////////////////////////////////////////
 
 export function startHangmanGame({
@@ -93,6 +33,8 @@ export function startHangmanGame({
   saveCardRound: saveFn,
   cardRound: roundStore
 }) {
+  console.log("🚀 startHangmanGame called");
+
   cards = [...inputCards];
   currentIndex = 0;
 
@@ -113,7 +55,7 @@ function setupUI() {
   const options = document.getElementById("options-container");
 
   if (!container || !options) {
-    console.error("Missing DOM elements for hangman");
+    console.error("❌ Missing DOM elements for hangman");
     return;
   }
 
