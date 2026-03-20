@@ -1,3 +1,5 @@
+import { getPromotedRound, saveCardRound, loadCardRound } from "./app.js";
+let cardRound = {};
 // memory.js
 
 let currentCards = [];
@@ -11,13 +13,14 @@ let matches = 0;
 // 🚀 ENTRY POINT (called from app.js)
 ////////////////////////////////////////////////////////////
 
-export function startMemoryGame(vocabulary) {
+export async function startMemoryGame(vocabulary) {
   if (!vocabulary || !vocabulary.length) {
     console.log("No vocabulary provided to memory game");
     return;
   }
 
   injectMemoryHTML();
+  cardRound = await loadCardRound();
 
   currentCards = createMemoryCards(vocabulary);
 
@@ -92,18 +95,15 @@ function startMemoryGameFromCurrent() {
 function createMemoryCards(vocab) {
   const MAX_WORDS = 8;
 
-  // Shuffle first so selection is random
   const shuffled = shuffle([...vocab]);
-
-  // Take only 8 words
-  const limited = shuffled.slice(0, MAX_WORDS);
+  const limited = shuffled.slice(0, Math.min(MAX_WORDS, shuffled.length));
 
   let cards = [];
 
   limited.forEach(card => {
     cards.push(
-      { text: card.front, pairId: card.back },
-      { text: card.back, pairId: card.back }
+      { text: card.front, pairId: card.back, original: card },
+      { text: card.back, pairId: card.back, original: card }
     );
   });
 
@@ -187,12 +187,19 @@ function checkMatch() {
     firstCard.dataset.pairId === secondCard.dataset.pairId;
 
   if (isMatch) {
+
+    // 🎯 UPDATE SPACED REPETITION
+    const card = firstCard.original; // same as secondCard.original
+
+    updateCardProgress(card);
+
     matches++;
     resetTurn();
 
     if (matches === currentCards.length / 2) {
       showWinMessage();
     }
+
   } else {
     setTimeout(() => {
       hideCard(firstCard);
@@ -220,6 +227,33 @@ function resetTurn() {
   firstCard = null;
   secondCard = null;
   lockBoard = false;
+}
+
+
+function updateCardProgress(card) {
+  const saved = cardRound[card.back] || {};
+
+  const currentRound = saved.round ?? card.round ?? 0;
+  const lastSeen = saved.lastSeen || card.lastSeen || new Date().toISOString();
+
+  let newRound;
+
+  if (currentRound === 0) {
+    newRound = 1;
+  } else {
+    newRound = getPromotedRound(currentRound, lastSeen);
+  }
+
+  const now = new Date().toISOString();
+
+  cardRound[card.back] = {
+    round: newRound,
+    lastSeen: now
+  };
+
+  saveCardRound(cardRound);
+
+  console.log(`Memory promoted: ${card.back} → Round ${newRound}`);
 }
 
 ////////////////////////////////////////////////////////////
