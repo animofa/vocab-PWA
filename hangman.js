@@ -34,6 +34,7 @@ export function startHangmanGame({
   cardRound: roundStore
 }) {
   console.log("🚀 startHangmanGame called");
+  console.log("lessonCards:", lessonCards);
 
   cards = [...inputCards];
   currentIndex = 0;
