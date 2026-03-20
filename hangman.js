@@ -2,13 +2,15 @@
 // 🎯 HANGMAN MODE (SELF-CONTAINED)
 ////////////////////////////////////////////////////////////
 
+// --- Dependencies injected from app.js ---
 let vocabulary = [];
 let cardRound = {};
-let isCardDue;
-let getPromotedRound;
-let saveCardRound;
-let showStudyMode;
+let isCardDue = () => true;
+let getPromotedRound = (r) => r;
+let saveCardRound = () => {};
+let showStudyMode = () => {};
 
+// --- Game state ---
 let currentIndex = 0;
 let cards = [];
 let mistakes = 0;
@@ -17,6 +19,7 @@ const MAX_MISTAKES = 6;
 let currentWord = "";
 let guessedLetters = [];
 
+// --- DOM ---
 let container;
 let wordDisplay;
 let input;
@@ -24,26 +27,34 @@ let info;
 let nextBtn;
 
 ////////////////////////////////////////////////////////////
-// 🚀 INIT (called from app.js)
+// 🚀 INIT (MAIN EXPORT)
 ////////////////////////////////////////////////////////////
 
-export function initHangman(deps) {
-  vocabulary = deps.vocabulary;
-  cardRound = deps.cardRound;
-  isCardDue = deps.isCardDue;
-  getPromotedRound = deps.getPromotedRound;
-  saveCardRound = deps.saveCardRound;
-  showStudyMode = deps.showStudyMode;
+export function initHangman(deps = {}) {
+  // Defensive assignment (prevents undefined crashes)
+  vocabulary = deps.vocabulary || [];
+  cardRound = deps.cardRound || {};
+  isCardDue = deps.isCardDue || isCardDue;
+  getPromotedRound = deps.getPromotedRound || getPromotedRound;
+  saveCardRound = deps.saveCardRound || saveCardRound;
+  showStudyMode = deps.showStudyMode || showStudyMode;
 
   attachButtonListeners();
 }
 
 ////////////////////////////////////////////////////////////
-// 🎯 BUTTON LISTENER (NOW INSIDE THIS FILE)
+// 🎯 BUTTON LISTENER
 ////////////////////////////////////////////////////////////
 
 function attachButtonListeners() {
-  document.querySelectorAll('.hangman-btn').forEach(btn => {
+  const buttons = document.querySelectorAll('.hangman-btn');
+
+  if (!buttons.length) {
+    console.warn("No .hangman-btn found");
+    return;
+  }
+
+  buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       const lesson = btn.getAttribute('data-lesson');
 
@@ -57,7 +68,7 @@ function attachButtonListeners() {
             lastSeen: saved.lastSeen || null
           };
         })
-        .filter(isCardDue);
+        .filter(card => isCardDue(card));
 
       if (!lessonCards.length) {
         alert("No due cards for Hangman!");
@@ -85,6 +96,11 @@ function startGame(inputCards) {
 function setupUI() {
   container = document.getElementById("card-container");
   const options = document.getElementById("options-container");
+
+  if (!container || !options) {
+    console.error("Missing DOM elements for hangman");
+    return;
+  }
 
   container.innerHTML = "";
   options.innerHTML = "";
@@ -115,13 +131,13 @@ function setupUI() {
 function loadWord() {
   if (currentIndex >= cards.length) {
     container.textContent = "Hangman session complete!";
-    input.style.display = "none";
+    if (input) input.style.display = "none";
     return;
   }
 
   const card = cards[currentIndex];
 
-  currentWord = card.back.toLowerCase();
+  currentWord = (card.back || "").toLowerCase();
   guessedLetters = [];
   mistakes = 0;
 
@@ -152,10 +168,10 @@ function updateInfo() {
 function handleInput(e) {
   if (e.key !== "Enter") return;
 
-  const letter = input.value.toLowerCase();
+  const letter = input.value.toLowerCase().trim();
   input.value = "";
 
-  if (!letter.match(/[a-zà-ÿ]/i)) return;
+  if (!letter || !letter.match(/[a-zà-ÿ]/i)) return;
   if (guessedLetters.includes(letter)) return;
 
   guessedLetters.push(letter);
@@ -166,7 +182,6 @@ function handleInput(e) {
 
   renderWord();
   updateInfo();
-
   checkGameState();
 }
 
@@ -189,6 +204,7 @@ function handleSuccess(card) {
   input.disabled = true;
   nextBtn.style.display = "block";
 
+  // Promote round
   card.round = getPromotedRound(card.round, card.lastSeen);
   card.lastSeen = new Date().toISOString();
 
@@ -205,6 +221,7 @@ function handleFail(card) {
   input.disabled = true;
   nextBtn.style.display = "block";
 
+  // Reinsert card later
   setTimeout(() => {
     const insertAt = Math.min(currentIndex + 2, cards.length);
     cards.splice(insertAt, 0, card);
