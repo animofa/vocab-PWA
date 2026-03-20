@@ -967,6 +967,17 @@ document.querySelectorAll('.memory-btn').forEach(btn => {
     startMemoryGame(lessonVocab);
   });
 });
+
+document.querySelectorAll('.hangman-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const lesson = this.getAttribute('data-lesson');
+
+    const lessonVocab = vocabulary.filter(card => card.lesson === lesson);
+
+    startHangmanGame(lessonVocab);
+  });
+});
+
 export { getPromotedRound, saveCardRound, loadCardRound };
 export function getVocabularyForLesson(lesson) {
   return vocabulary.filter(card => card.lesson === lesson);
