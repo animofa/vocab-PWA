@@ -1,13 +1,6 @@
 ////////////////////////////////////////////////////////////
-// 🎯 HANGMAN MODE (SELF-CONTAINED)
+// 🎯 HANGMAN MODE (EXPORTED FUNCTION)
 ////////////////////////////////////////////////////////////
-
-let vocabulary = [];
-let cardRound = {};
-let isCardDue;
-let getPromotedRound;
-let saveCardRound;
-let showStudyMode;
 
 let currentIndex = 0;
 let cards = [];
@@ -17,74 +10,52 @@ const MAX_MISTAKES = 6;
 let currentWord = "";
 let guessedLetters = [];
 
+// DOM
 let container;
 let wordDisplay;
 let input;
 let info;
 let nextBtn;
 
-////////////////////////////////////////////////////////////
-// 🚀 INIT (called from app.js)
-////////////////////////////////////////////////////////////
-
-export function initHangman(deps) {
-  vocabulary = deps.vocabulary;
-  cardRound = deps.cardRound;
-  isCardDue = deps.isCardDue;
-  getPromotedRound = deps.getPromotedRound;
-  saveCardRound = deps.saveCardRound;
-  showStudyMode = deps.showStudyMode;
-
-  attachButtonListeners();
-}
+// Dependencies (passed from app.js)
+let getPromotedRound;
+let saveCardRound;
+let cardRound;
 
 ////////////////////////////////////////////////////////////
-// 🎯 BUTTON LISTENER (NOW INSIDE THIS FILE)
+// 🚀 MAIN EXPORT
 ////////////////////////////////////////////////////////////
 
-function attachButtonListeners() {
-  document.querySelectorAll('.hangman-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lesson = btn.getAttribute('data-lesson');
-
-      const lessonCards = vocabulary
-        .filter(card => card.lesson === lesson)
-        .map(card => {
-          const saved = cardRound[card.back] || {};
-          return {
-            ...card,
-            round: saved.round ?? 0,
-            lastSeen: saved.lastSeen || null
-          };
-        })
-        .filter(isCardDue);
-
-      if (!lessonCards.length) {
-        alert("No due cards for Hangman!");
-        return;
-      }
-
-      startGame(lessonCards);
-      showStudyMode();
-    });
-  });
-}
-
-////////////////////////////////////////////////////////////
-// 🎮 GAME LOGIC
-////////////////////////////////////////////////////////////
-
-function startGame(inputCards) {
+export function startHangmanGame({
+  cards: inputCards,
+  getPromotedRound: promoteFn,
+  saveCardRound: saveFn,
+  cardRound: roundStore
+}) {
+  // Assign dependencies
   cards = [...inputCards];
   currentIndex = 0;
+
+  getPromotedRound = promoteFn;
+  saveCardRound = saveFn;
+  cardRound = roundStore;
 
   setupUI();
   loadWord();
 }
 
+////////////////////////////////////////////////////////////
+// 🎮 UI SETUP
+////////////////////////////////////////////////////////////
+
 function setupUI() {
   container = document.getElementById("card-container");
   const options = document.getElementById("options-container");
+
+  if (!container || !options) {
+    console.error("Missing DOM elements for hangman");
+    return;
+  }
 
   container.innerHTML = "";
   options.innerHTML = "";
@@ -112,16 +83,20 @@ function setupUI() {
   nextBtn.addEventListener("click", nextWord);
 }
 
+////////////////////////////////////////////////////////////
+// 🔤 LOAD WORD
+////////////////////////////////////////////////////////////
+
 function loadWord() {
   if (currentIndex >= cards.length) {
     container.textContent = "Hangman session complete!";
-    input.style.display = "none";
+    if (input) input.style.display = "none";
     return;
   }
 
   const card = cards[currentIndex];
 
-  currentWord = card.back.toLowerCase();
+  currentWord = (card.back || "").toLowerCase();
   guessedLetters = [];
   mistakes = 0;
 
@@ -132,6 +107,10 @@ function loadWord() {
   renderWord();
   updateInfo();
 }
+
+////////////////////////////////////////////////////////////
+// 🧩 RENDERING
+////////////////////////////////////////////////////////////
 
 function renderWord() {
   const display = currentWord
@@ -149,13 +128,17 @@ function updateInfo() {
   info.textContent = `Mistakes: ${mistakes} / ${MAX_MISTAKES}`;
 }
 
+////////////////////////////////////////////////////////////
+// ⌨ INPUT HANDLING
+////////////////////////////////////////////////////////////
+
 function handleInput(e) {
   if (e.key !== "Enter") return;
 
-  const letter = input.value.toLowerCase();
+  const letter = input.value.toLowerCase().trim();
   input.value = "";
 
-  if (!letter.match(/[a-zà-ÿ]/i)) return;
+  if (!letter || !letter.match(/[a-zà-ÿ]/i)) return;
   if (guessedLetters.includes(letter)) return;
 
   guessedLetters.push(letter);
@@ -166,9 +149,12 @@ function handleInput(e) {
 
   renderWord();
   updateInfo();
-
   checkGameState();
 }
+
+////////////////////////////////////////////////////////////
+// 🧠 GAME STATE
+////////////////////////////////////////////////////////////
 
 function checkGameState() {
   const isWordComplete = currentWord
@@ -183,6 +169,10 @@ function checkGameState() {
     handleFail(card);
   }
 }
+
+////////////////////////////////////////////////////////////
+// ✅ SUCCESS
+////////////////////////////////////////////////////////////
 
 function handleSuccess(card) {
   info.textContent = `✅ Correct! Word: ${card.back}`;
@@ -200,6 +190,10 @@ function handleSuccess(card) {
   saveCardRound(cardRound);
 }
 
+////////////////////////////////////////////////////////////
+// ❌ FAIL
+////////////////////////////////////////////////////////////
+
 function handleFail(card) {
   info.textContent = `❌ Failed! Word was: ${card.back}`;
   input.disabled = true;
@@ -210,6 +204,10 @@ function handleFail(card) {
     cards.splice(insertAt, 0, card);
   }, 300);
 }
+
+////////////////////////////////////////////////////////////
+// ➡ NEXT WORD
+////////////////////////////////////////////////////////////
 
 function nextWord() {
   currentIndex++;
