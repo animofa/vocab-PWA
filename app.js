@@ -1,4 +1,5 @@
 import { loadVocabularyForLanguage } from "./language-manager.js";
+import { startMemoryGame } from "./memory.js";
 
 const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
 // Detect mode from URL
@@ -955,3 +956,17 @@ document.querySelectorAll('.audio-btn').forEach(btn => {
     runAudioQueue();
   });
 });
+
+document.querySelectorAll('.memory-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const lesson = this.getAttribute('data-lesson');
+
+    const lessonVocab = vocabulary.filter(card => card.lesson === lesson);
+
+    startMemoryGame(lessonVocab);
+  });
+});
+
+export function getVocabularyForLesson(lesson) {
+  return vocabulary.filter(card => card.lesson === lesson);
+}
