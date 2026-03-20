@@ -1,6 +1,6 @@
 import { getPromotedRound, saveCardRound, loadCardRound } from "./app.js";
+
 let cardRound = {};
-// memory.js
 
 let currentCards = [];
 let firstCard = null;
@@ -10,7 +10,7 @@ let moves = 0;
 let matches = 0;
 
 ////////////////////////////////////////////////////////////
-// 🚀 ENTRY POINT (called from app.js)
+// 🚀 ENTRY POINT
 ////////////////////////////////////////////////////////////
 
 export async function startMemoryGame(vocabulary) {
@@ -20,7 +20,14 @@ export async function startMemoryGame(vocabulary) {
   }
 
   injectMemoryHTML();
+
+  // Load spaced repetition progress
   cardRound = await loadCardRound();
+
+  // Reset promotion flags (important on restart)
+  vocabulary.forEach(card => {
+    card._memoryPromoted = false;
+  });
 
   currentCards = createMemoryCards(vocabulary);
 
@@ -62,17 +69,14 @@ function injectMemoryHTML() {
 
   container.style.display = "block";
 
-  // Hide dashboard if exists
   const dashboard = document.querySelector('.dashboard');
   if (dashboard) dashboard.style.display = 'none';
 
-  // Close button
   document.getElementById("close-memory").onclick = () => {
     container.style.display = "none";
     if (dashboard) dashboard.style.display = '';
   };
 
-  // Restart button
   document.getElementById("restart-memory").onclick = () => {
     startMemoryGameFromCurrent();
   };
@@ -84,6 +88,12 @@ function injectMemoryHTML() {
 
 function startMemoryGameFromCurrent() {
   currentCards = shuffle(currentCards);
+
+  // reset promotion flags again
+  currentCards.forEach(c => {
+    if (c.original) c.original._memoryPromoted = false;
+  });
+
   resetGameState();
   renderMemoryGame();
 }
@@ -149,6 +159,9 @@ function renderMemoryGame() {
     el.dataset.text = card.text;
     el.dataset.pairId = card.pairId;
 
+    // ✅ CRITICAL FIX: attach original card
+    el.original = card.original;
+
     el.addEventListener("click", () => onCardClick(el));
 
     grid.appendChild(el);
@@ -187,11 +200,13 @@ function checkMatch() {
     firstCard.dataset.pairId === secondCard.dataset.pairId;
 
   if (isMatch) {
+    const card = firstCard.original;
 
-    // 🎯 UPDATE SPACED REPETITION
-    const card = firstCard.original; // same as secondCard.original
-
-    updateCardProgress(card);
+    // ✅ prevent multiple promotions per session
+    if (!card._memoryPromoted) {
+      updateCardProgress(card);
+      card._memoryPromoted = true;
+    }
 
     matches++;
     resetTurn();
@@ -229,6 +244,9 @@ function resetTurn() {
   lockBoard = false;
 }
 
+////////////////////////////////////////////////////////////
+// 📈 SPACED REPETITION UPDATE
+////////////////////////////////////////////////////////////
 
 function updateCardProgress(card) {
   const saved = cardRound[card.back] || {};
