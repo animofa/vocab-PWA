@@ -1,5 +1,6 @@
 import { loadVocabularyForLanguage } from "./language-manager.js";
 import { startMemoryGame } from "./memory.js";
+import { startHangmanGame } from "./hangman.js";
 
 const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
 // Detect mode from URL
