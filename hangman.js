@@ -1,7 +1,8 @@
 ////////////////////////////////////////////////////////////
-// 🎯 HANGMAN MODE (EXPORTED FUNCTION)
+// 🎯 HANGMAN MODE (EXPORTED FUNCTION + BUTTON LISTENER)
 ////////////////////////////////////////////////////////////
 
+// --- Game state ---
 let currentIndex = 0;
 let cards = [];
 let mistakes = 0;
@@ -10,20 +11,80 @@ const MAX_MISTAKES = 6;
 let currentWord = "";
 let guessedLetters = [];
 
-// DOM
+// --- DOM ---
 let container;
 let wordDisplay;
 let input;
 let info;
 let nextBtn;
 
-// Dependencies (passed from app.js)
+// --- Dependencies (from app.js) ---
+let vocabulary = [];
+let cardRound = {};
+let isCardDue;
 let getPromotedRound;
 let saveCardRound;
-let cardRound;
+let showStudyMode;
 
 ////////////////////////////////////////////////////////////
-// 🚀 MAIN EXPORT
+// 🚀 INIT (CALL THIS FROM app.js ONCE)
+////////////////////////////////////////////////////////////
+
+export function initHangman(deps) {
+  vocabulary = deps.vocabulary;
+  cardRound = deps.cardRound;
+  isCardDue = deps.isCardDue;
+  getPromotedRound = deps.getPromotedRound;
+  saveCardRound = deps.saveCardRound;
+  showStudyMode = deps.showStudyMode;
+
+  attachButtonListeners();
+}
+
+////////////////////////////////////////////////////////////
+// 🎯 BUTTON LISTENER (NOW INSIDE THIS FILE)
+////////////////////////////////////////////////////////////
+
+function attachButtonListeners() {
+  document.querySelectorAll('.hangman-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      console.log("Hangman button clicked");
+
+      const lesson = btn.getAttribute('data-lesson');
+
+      const lessonCards = vocabulary
+        .filter(card => card.lesson === lesson)
+        .map(card => {
+          const saved = cardRound[card.back] || {};
+          return {
+            ...card,
+            round: saved.round ?? 0,
+            lastSeen: saved.lastSeen || null
+          };
+        })
+        .filter(card => isCardDue(card));
+
+      console.log("Hangman cards:", lessonCards);
+
+      if (!lessonCards.length) {
+        alert("No due cards for Hangman!");
+        return;
+      }
+
+      startHangmanGame({
+        cards: lessonCards,
+        getPromotedRound,
+        saveCardRound,
+        cardRound
+      });
+
+      showStudyMode();
+    });
+  });
+}
+
+////////////////////////////////////////////////////////////
+// 🚀 MAIN GAME EXPORT (CAN STILL BE USED DIRECTLY)
 ////////////////////////////////////////////////////////////
 
 export function startHangmanGame({
@@ -32,7 +93,6 @@ export function startHangmanGame({
   saveCardRound: saveFn,
   cardRound: roundStore
 }) {
-  // Assign dependencies
   cards = [...inputCards];
   currentIndex = 0;
 
