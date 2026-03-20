@@ -973,6 +973,7 @@ document.querySelectorAll('.hangman-btn').forEach(btn => {
     const lesson = this.getAttribute('data-lesson');
 
     const lessonVocab = vocabulary.filter(card => card.lesson === lesson);
+    console.log('hangman button clicked');
 
     startHangmanGame(lessonVocab);
   });
