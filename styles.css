@@ -687,3 +687,35 @@ h2 {
   border-color: var(--main);
 }
 
+
+#memory-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 999;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 20px;
+}
+
+.memory-card {
+  background: #eee;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.memory-card.revealed {
+  background: #cde7ff;
+}
