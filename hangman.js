@@ -15,6 +15,7 @@ let guessedLetters = [];
 let container;
 let wordDisplay;
 let lettersEl;
+let hintEl;
 let info;
 let nextBtn;
 
@@ -33,9 +34,6 @@ export function startHangmanGame({
   saveCardRound: saveFn,
   cardRound: roundStore
 }) {
-  console.log("🚀 startHangmanGame called");
-  console.log("inputCards:", inputCards);
-
   cards = [...inputCards];
   currentIndex = 0;
 
@@ -63,6 +61,9 @@ function setupUI() {
   container.innerHTML = "";
   options.innerHTML = "";
 
+  hintEl = document.createElement("div");
+  hintEl.className = "hangman-hint";
+
   wordDisplay = document.createElement("div");
   wordDisplay.className = "hangman-word";
 
@@ -76,17 +77,20 @@ function setupUI() {
   nextBtn.textContent = "Next";
   nextBtn.style.display = "none";
 
+  options.appendChild(hintEl);
   options.appendChild(wordDisplay);
   options.appendChild(lettersEl);
   options.appendChild(info);
   options.appendChild(nextBtn);
 
   nextBtn.addEventListener("click", nextWord);
-  renderLetters();
+
+  // Optional keyboard support
+  document.addEventListener("keydown", handleKeyPress);
 }
 
 ////////////////////////////////////////////////////////////
-// 🔤 RENDERING LETTERS
+// 🔤 RENDER LETTER BUTTONS
 ////////////////////////////////////////////////////////////
 
 function renderLetters() {
@@ -109,7 +113,7 @@ function renderLetters() {
 
 function loadWord() {
   if (currentIndex >= cards.length) {
-    container.textContent = "Hangman session complete!";
+    container.textContent = "🎉 Hangman session complete!";
     if (lettersEl) lettersEl.style.display = "none";
     return;
   }
@@ -120,14 +124,20 @@ function loadWord() {
   guessedLetters = [];
   lives = MAX_LIVES;
 
+  // 💡 HINT (QUESTION SIDE)
+  hintEl.textContent = card.front
+    ? `Hint: ${card.front}`
+    : "Guess the word!";
+
   nextBtn.style.display = "none";
+
   renderLetters();
   renderWord();
   updateInfo();
 }
 
 ////////////////////////////////////////////////////////////
-// 🧠 RENDERING WORD
+// 🧠 RENDER WORD
 ////////////////////////////////////////////////////////////
 
 function renderWord() {
@@ -143,7 +153,7 @@ function renderWord() {
 }
 
 ////////////////////////////////////////////////////////////
-// ⏳ UPDATE INFO (LIVES)
+// ℹ️ UPDATE INFO
 ////////////////////////////////////////////////////////////
 
 function updateInfo() {
@@ -151,7 +161,7 @@ function updateInfo() {
 }
 
 ////////////////////////////////////////////////////////////
-// ⌨ HANDLE GUESS (CLICK EVENT)
+// 🎯 HANDLE GUESS
 ////////////////////////////////////////////////////////////
 
 function handleGuess(letter, btn) {
@@ -174,7 +184,21 @@ function handleGuess(letter, btn) {
 }
 
 ////////////////////////////////////////////////////////////
-// 🧠 CHECK GAME STATE
+// ⌨️ KEYBOARD SUPPORT
+////////////////////////////////////////////////////////////
+
+function handleKeyPress(e) {
+  const letter = e.key.toLowerCase();
+
+  document.querySelectorAll(".letter").forEach(btn => {
+    if (btn.textContent === letter) {
+      btn.click();
+    }
+  });
+}
+
+////////////////////////////////////////////////////////////
+// 🧠 GAME STATE CHECK
 ////////////////////////////////////////////////////////////
 
 function checkGameState() {
@@ -192,13 +216,16 @@ function checkGameState() {
 }
 
 ////////////////////////////////////////////////////////////
-// ✅ SUCCESS (WORD COMPLETED)
+// ✅ SUCCESS
 ////////////////////////////////////////////////////////////
 
 function handleSuccess(card) {
   info.textContent = `✅ Correct! Word: ${card.back}`;
   nextBtn.style.display = "block";
 
+  disableLetters();
+
+  // 🧠 spaced repetition logic
   card.round = getPromotedRound(card.round, card.lastSeen);
   card.lastSeen = new Date().toISOString();
 
@@ -211,17 +238,30 @@ function handleSuccess(card) {
 }
 
 ////////////////////////////////////////////////////////////
-// ❌ FAIL (OUT OF LIVES)
+// ❌ FAIL
 ////////////////////////////////////////////////////////////
 
 function handleFail(card) {
   info.textContent = `❌ Failed! Word was: ${card.back}`;
   nextBtn.style.display = "block";
 
+  disableLetters();
+
+  // reinsert card later
   setTimeout(() => {
     const insertAt = Math.min(currentIndex + 2, cards.length);
     cards.splice(insertAt, 0, card);
   }, 300);
+}
+
+////////////////////////////////////////////////////////////
+// 🔒 DISABLE LETTERS AFTER ROUND
+////////////////////////////////////////////////////////////
+
+function disableLetters() {
+  document.querySelectorAll(".letter").forEach(btn => {
+    btn.style.pointerEvents = "none";
+  });
 }
 
 ////////////////////////////////////////////////////////////
