@@ -5,8 +5,8 @@
 // --- Game state ---
 let currentIndex = 0;
 let cards = [];
-let mistakes = 0;
-const MAX_MISTAKES = 6;
+let lives = 6;
+const MAX_LIVES = 6;
 
 let currentWord = "";
 let guessedLetters = [];
@@ -14,7 +14,7 @@ let guessedLetters = [];
 // --- DOM ---
 let container;
 let wordDisplay;
-let input;
+let lettersEl;
 let info;
 let nextBtn;
 
@@ -66,9 +66,8 @@ function setupUI() {
   wordDisplay = document.createElement("div");
   wordDisplay.className = "hangman-word";
 
-  input = document.createElement("input");
-  input.placeholder = "Type a letter...";
-  input.maxLength = 1;
+  lettersEl = document.createElement("div");
+  lettersEl.className = "hangman-letters";
 
   info = document.createElement("div");
   info.className = "hangman-info";
@@ -78,22 +77,40 @@ function setupUI() {
   nextBtn.style.display = "none";
 
   options.appendChild(wordDisplay);
-  options.appendChild(input);
+  options.appendChild(lettersEl);
   options.appendChild(info);
   options.appendChild(nextBtn);
 
-  input.addEventListener("keydown", handleInput);
   nextBtn.addEventListener("click", nextWord);
+  renderLetters();
 }
 
 ////////////////////////////////////////////////////////////
-// 🔤 LOAD WORD
+// 🔤 RENDERING LETTERS
+////////////////////////////////////////////////////////////
+
+function renderLetters() {
+  lettersEl.innerHTML = "";
+
+  "abcdefghijklmnopqrstuvwxyz".split("").forEach(letter => {
+    const btn = document.createElement("div");
+    btn.className = "letter";
+    btn.textContent = letter;
+
+    btn.onclick = () => handleGuess(letter, btn);
+
+    lettersEl.appendChild(btn);
+  });
+}
+
+////////////////////////////////////////////////////////////
+// 🧩 LOAD WORD
 ////////////////////////////////////////////////////////////
 
 function loadWord() {
   if (currentIndex >= cards.length) {
     container.textContent = "Hangman session complete!";
-    if (input) input.style.display = "none";
+    if (lettersEl) lettersEl.style.display = "none";
     return;
   }
 
@@ -101,18 +118,16 @@ function loadWord() {
 
   currentWord = (card.back || "").toLowerCase();
   guessedLetters = [];
-  mistakes = 0;
+  lives = MAX_LIVES;
 
   nextBtn.style.display = "none";
-  input.disabled = false;
-  input.value = "";
-
+  renderLetters();
   renderWord();
   updateInfo();
 }
 
 ////////////////////////////////////////////////////////////
-// 🧩 RENDERING
+// 🧠 RENDERING WORD
 ////////////////////////////////////////////////////////////
 
 function renderWord() {
@@ -127,28 +142,31 @@ function renderWord() {
   wordDisplay.textContent = display;
 }
 
+////////////////////////////////////////////////////////////
+// ⏳ UPDATE INFO (LIVES)
+////////////////////////////////////////////////////////////
+
 function updateInfo() {
-  info.textContent = `Mistakes: ${mistakes} / ${MAX_MISTAKES}`;
+  info.textContent = `Lives: ${lives}`;
 }
 
 ////////////////////////////////////////////////////////////
-// ⌨ INPUT HANDLING
+// ⌨ HANDLE GUESS (CLICK EVENT)
 ////////////////////////////////////////////////////////////
 
-function handleInput(e) {
-  if (e.key !== "Enter") return;
-
-  const letter = input.value.toLowerCase().trim();
-  input.value = "";
-
-  if (!letter || !letter.match(/[a-zà-ÿ]/i)) return;
-  if (guessedLetters.includes(letter)) return;
+function handleGuess(letter, btn) {
+  if (guessedLetters.includes(letter) || lives <= 0) return;
 
   guessedLetters.push(letter);
 
-  if (!currentWord.includes(letter)) {
-    mistakes++;
+  if (currentWord.includes(letter)) {
+    btn.classList.add("correct");
+  } else {
+    btn.classList.add("wrong");
+    lives--;
   }
+
+  btn.classList.add("used");
 
   renderWord();
   updateInfo();
@@ -156,7 +174,7 @@ function handleInput(e) {
 }
 
 ////////////////////////////////////////////////////////////
-// 🧠 GAME STATE
+// 🧠 CHECK GAME STATE
 ////////////////////////////////////////////////////////////
 
 function checkGameState() {
@@ -168,18 +186,17 @@ function checkGameState() {
 
   if (isWordComplete) {
     handleSuccess(card);
-  } else if (mistakes >= MAX_MISTAKES) {
+  } else if (lives <= 0) {
     handleFail(card);
   }
 }
 
 ////////////////////////////////////////////////////////////
-// ✅ SUCCESS
+// ✅ SUCCESS (WORD COMPLETED)
 ////////////////////////////////////////////////////////////
 
 function handleSuccess(card) {
   info.textContent = `✅ Correct! Word: ${card.back}`;
-  input.disabled = true;
   nextBtn.style.display = "block";
 
   card.round = getPromotedRound(card.round, card.lastSeen);
@@ -194,12 +211,11 @@ function handleSuccess(card) {
 }
 
 ////////////////////////////////////////////////////////////
-// ❌ FAIL
+// ❌ FAIL (OUT OF LIVES)
 ////////////////////////////////////////////////////////////
 
 function handleFail(card) {
   info.textContent = `❌ Failed! Word was: ${card.back}`;
-  input.disabled = true;
   nextBtn.style.display = "block";
 
   setTimeout(() => {
