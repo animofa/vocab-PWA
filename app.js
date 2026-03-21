@@ -969,13 +969,40 @@ document.querySelectorAll('.memory-btn').forEach(btn => {
 });
 
 document.querySelectorAll('.hangman-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const lesson = this.getAttribute('data-lesson');
+  btn.addEventListener('click', () => {
+    console.log("Hangman button clicked");
 
-    const lessonVocab = vocabulary.filter(card => card.lesson === lesson);
-    console.log('hangman button clicked');
+    const lesson = btn.getAttribute('data-lesson');
 
-    startHangmanGame(lessonVocab);
+    // Filter lesson cards based on the selected lesson
+    const lessonCards = vocabulary
+      .filter(card => card.lesson === lesson)
+      .map(card => {
+        const saved = cardRound[card.back] || {};
+        return {
+          ...card,
+          round: saved.round ?? 0,
+          lastSeen: saved.lastSeen || null
+        };
+      })
+      .filter(card => isCardDue(card)); // Ensure card is due for review
+
+    console.log("Hangman cards:", lessonCards);
+
+    if (!lessonCards.length) {
+      alert("No due cards for Hangman!");
+      return;
+    }
+
+    // Now you pass an object with `cards` to startHangmanGame
+    startHangmanGame({
+      cards: lessonCards,
+      getPromotedRound,
+      saveCardRound,
+      cardRound
+    });
+
+    showStudyMode();
   });
 });
 
