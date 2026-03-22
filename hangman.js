@@ -85,8 +85,31 @@ function setupUI() {
 
   nextBtn.addEventListener("click", nextWord);
 
-  // Optional keyboard support
   document.addEventListener("keydown", handleKeyPress);
+}
+
+////////////////////////////////////////////////////////////
+// 🔤 FLEXIBLE CARD PARSER (KEY FIX)
+////////////////////////////////////////////////////////////
+
+function getCardData(card) {
+  const hint =
+    card.front ||
+    card.question ||
+    card.fr ||
+    card.hint ||
+    "Guess the word!";
+
+  const answer =
+    card.back ||
+    card.answer ||
+    card.en ||
+    "";
+
+  return {
+    hint,
+    answer: answer.toLowerCase()
+  };
 }
 
 ////////////////////////////////////////////////////////////
@@ -119,15 +142,14 @@ function loadWord() {
   }
 
   const card = cards[currentIndex];
+  const { hint, answer } = getCardData(card);
 
-  currentWord = (card.back || "").toLowerCase();
+  currentWord = answer;
   guessedLetters = [];
   lives = MAX_LIVES;
 
-  // 💡 HINT (QUESTION SIDE)
-  hintEl.textContent = card.front
-    ? `Hint: ${card.front}`
-    : "Guess the word!";
+  // 💡 ALWAYS SHOW HINT
+  hintEl.textContent = `Hint: ${hint}`;
 
   nextBtn.style.display = "none";
 
@@ -220,16 +242,15 @@ function checkGameState() {
 ////////////////////////////////////////////////////////////
 
 function handleSuccess(card) {
-  info.textContent = `✅ Correct! Word: ${card.back}`;
+  info.textContent = `✅ Correct! Word: ${currentWord}`;
   nextBtn.style.display = "block";
 
   disableLetters();
 
-  // 🧠 spaced repetition logic
   card.round = getPromotedRound(card.round, card.lastSeen);
   card.lastSeen = new Date().toISOString();
 
-  cardRound[card.back] = {
+  cardRound[currentWord] = {
     round: card.round,
     lastSeen: card.lastSeen
   };
@@ -242,12 +263,11 @@ function handleSuccess(card) {
 ////////////////////////////////////////////////////////////
 
 function handleFail(card) {
-  info.textContent = `❌ Failed! Word was: ${card.back}`;
+  info.textContent = `❌ Failed! Word was: ${currentWord}`;
   nextBtn.style.display = "block";
 
   disableLetters();
 
-  // reinsert card later
   setTimeout(() => {
     const insertAt = Math.min(currentIndex + 2, cards.length);
     cards.splice(insertAt, 0, card);
@@ -255,7 +275,7 @@ function handleFail(card) {
 }
 
 ////////////////////////////////////////////////////////////
-// 🔒 DISABLE LETTERS AFTER ROUND
+// 🔒 DISABLE LETTERS
 ////////////////////////////////////////////////////////////
 
 function disableLetters() {
