@@ -58,6 +58,10 @@ function setupUI() {
     return;
   }
 
+  // ✅ ADD THIS
+  container.classList.add("hangman");
+  options.classList.add("hangman");
+
   container.innerHTML = "";
   options.innerHTML = "";
 
