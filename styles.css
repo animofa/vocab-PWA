@@ -719,3 +719,250 @@ h2 {
 .memory-card.revealed {
   background: #cde7ff;
 }
+
+
+/* 🌟 HANGMAN GAME STYLING */
+
+
+
+/* Hint */
+.hangman-hint {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--main);
+  text-align: center;
+}
+
+/* Word display */
+.hangman-word {
+  font-size: 2rem;
+  letter-spacing: 0.5rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  color: var(--text);
+  text-align: center;
+}
+
+/* Letters container */
+.hangman-letters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Individual letter button */
+.letter {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background-color: var(--secondary);
+  color: var(--text);
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.letter:hover {
+  transform: translateY(-3px);
+  background-color: var(--yellow);
+}
+
+.letter.used {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.letter.correct {
+  background-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(120,179,89,0.5);
+}
+
+.letter.wrong {
+  background-color: var(--red-light);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(222,39,39,0.5);
+}
+
+/* Info area (lives & feedback) */
+.hangman-info {
+  font-size: 1rem;
+  margin-top: 1rem;
+  font-weight: 500;
+  color: var(--dark);
+  text-align: center;
+}
+
+/* Next button */
+#options-container button {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  background-color: var(--main);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+#options-container button:hover {
+  background-color: var(--red);
+}
+
+/* Lives as hearts (optional enhancement) */
+.hangman-info .heart {
+  color: var(--red);
+  font-size: 1.2rem;
+  margin: 0 2px;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .hangman-word {
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
+  }
+
+  .letter {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+}
+
+/* 🌟 HANGMAN GAME FIXED LAYOUT */
+
+
+/* Options container to prevent button cutoff */
+#options-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Hint */
+.hangman-hint {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--main);
+  text-align: center;
+}
+
+/* Word display */
+.hangman-word {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 1rem 0 2rem 0;
+  color: var(--text);
+  text-align: center;
+  letter-spacing: 0.5rem;
+}
+
+/* Underscores for letters */
+.hangman-word span {
+  border-bottom: 2px solid var(--dark);
+  display: inline-block;
+  width: 1.5rem;
+  text-align: center;
+  margin: 0 0.2rem;
+}
+
+/* Letters container */
+.hangman-letters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+/* Individual letter button */
+.letter {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background-color: var(--secondary);
+  color: var(--text);
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.letter:hover {
+  transform: translateY(-3px);
+  background-color: var(--yellow);
+}
+
+.letter.used {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.letter.correct {
+  background-color: var(--green);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(120,179,89,0.5);
+}
+
+.letter.wrong {
+  background-color: var(--red-light);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(222,39,39,0.5);
+}
+
+/* Info area (lives & feedback) */
+.hangman-info {
+  font-size: 1rem;
+  margin-top: 1rem;
+  font-weight: 500;
+  color: var(--dark);
+  text-align: center;
+}
+
+/* Next button */
+#options-container button {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  background-color: var(--main);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+#options-container button:hover {
+  background-color: var(--red);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .hangman-word {
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
+  }
+
+  .letter {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+}
