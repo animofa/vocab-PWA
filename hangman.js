@@ -166,7 +166,7 @@ function renderWord() {
   const display = currentWord
     .split("")
     .map(letter => {
-      if (letter === " ") return " ";
+      if (letter === " " || letter === "'") return " ";
       return guessedLetters.includes(letter) ? letter : "_";
     })
     .join(" ");
@@ -191,7 +191,11 @@ function handleGuess(letter, btn) {
 
   guessedLetters.push(letter);
 
-  if (currentWord.includes(letter)) {
+  // Normalize currentWord and guess for comparison
+  const normalizedWord = currentWord.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const normalizedLetter = letter.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  if (normalizedWord.includes(normalizedLetter)) {
     btn.classList.add("correct");
   } else {
     btn.classList.add("wrong");
