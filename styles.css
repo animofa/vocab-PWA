@@ -726,7 +726,7 @@ h2 {
 
 
 /* Hint */
-.hangman-hint {
+.hangman .hangman-hint {
   font-size: 1.2rem;
   font-weight: 500;
   margin-bottom: 1rem;
@@ -735,7 +735,7 @@ h2 {
 }
 
 /* Word display */
-.hangman-word {
+.hangman .hangman-word {
   font-size: 2rem;
   letter-spacing: 0.5rem;
   font-weight: bold;
@@ -745,7 +745,7 @@ h2 {
 }
 
 /* Letters container */
-.hangman-letters {
+.hangman .hangman-letters {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -754,7 +754,7 @@ h2 {
 }
 
 /* Individual letter button */
-.letter {
+.hangman .letter {
   width: 40px;
   height: 40px;
   display: grid;
@@ -769,30 +769,30 @@ h2 {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.letter:hover {
+.hangman .letter:hover {
   transform: translateY(-3px);
   background-color: var(--yellow);
 }
 
-.letter.used {
+.hangman .letter.used {
   pointer-events: none;
   opacity: 0.5;
 }
 
-.letter.correct {
+.hangman .letter.correct {
   background-color: var(--green);
   color: #fff;
   box-shadow: 0 0 10px rgba(120,179,89,0.5);
 }
 
-.letter.wrong {
+.hangman .letter.wrong {
   background-color: var(--red-light);
   color: #fff;
   box-shadow: 0 0 10px rgba(222,39,39,0.5);
 }
 
 /* Info area (lives & feedback) */
-.hangman-info {
+.hangman .hangman-info {
   font-size: 1rem;
   margin-top: 1rem;
   font-weight: 500;
@@ -801,7 +801,7 @@ h2 {
 }
 
 /* Next button */
-#options-container button {
+#options-container.hangman button {
   margin-top: 1.5rem;
   padding: 0.5rem 1.2rem;
   font-size: 1rem;
@@ -814,12 +814,12 @@ h2 {
   transition: all 0.3s ease;
 }
 
-#options-container button:hover {
+#options-container.hangman button:hover {
   background-color: var(--red);
 }
 
 /* Lives as hearts (optional enhancement) */
-.hangman-info .heart {
+.hangman .hangman-info .heart {
   color: var(--red);
   font-size: 1.2rem;
   margin: 0 2px;
@@ -827,12 +827,12 @@ h2 {
 
 /* Responsive */
 @media (max-width: 500px) {
-  .hangman-word {
+  .hangman .hangman-word {
     font-size: 1.5rem;
     letter-spacing: 0.3rem;
   }
 
-  .letter {
+  .hangman .letter {
     width: 35px;
     height: 35px;
     font-size: 0.9rem;
@@ -841,9 +841,8 @@ h2 {
 
 /* 🌟 HANGMAN GAME FIXED LAYOUT */
 
-
 /* Options container to prevent button cutoff */
-#options-container {
+#options-container.hangman {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -852,7 +851,7 @@ h2 {
 }
 
 /* Hint */
-.hangman-hint {
+.hangman .hangman-hint {
   font-size: 1.2rem;
   font-weight: 500;
   margin-bottom: 1rem;
@@ -861,7 +860,7 @@ h2 {
 }
 
 /* Word display */
-.hangman-word {
+.hangman .hangman-word {
   font-size: 2rem;
   font-weight: bold;
   margin: 1rem 0 2rem 0;
@@ -871,7 +870,7 @@ h2 {
 }
 
 /* Underscores for letters */
-.hangman-word span {
+.hangman .hangman-word span {
   border-bottom: 2px solid var(--dark);
   display: inline-block;
   width: 1.5rem;
@@ -880,7 +879,7 @@ h2 {
 }
 
 /* Letters container */
-.hangman-letters {
+.hangman .hangman-letters {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -889,7 +888,7 @@ h2 {
 }
 
 /* Individual letter button */
-.letter {
+.hangman .letter {
   width: 40px;
   height: 40px;
   display: grid;
@@ -904,30 +903,30 @@ h2 {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.letter:hover {
+.hangman .letter:hover {
   transform: translateY(-3px);
   background-color: var(--yellow);
 }
 
-.letter.used {
+.hangman .letter.used {
   pointer-events: none;
   opacity: 0.5;
 }
 
-.letter.correct {
+.hangman .letter.correct {
   background-color: var(--green);
   color: #fff;
   box-shadow: 0 0 10px rgba(120,179,89,0.5);
 }
 
-.letter.wrong {
+.hangman .letter.wrong {
   background-color: var(--red-light);
   color: #fff;
   box-shadow: 0 0 10px rgba(222,39,39,0.5);
 }
 
-/* Info area (lives & feedback) */
-.hangman-info {
+/* Info area */
+.hangman .hangman-info {
   font-size: 1rem;
   margin-top: 1rem;
   font-weight: 500;
@@ -936,7 +935,7 @@ h2 {
 }
 
 /* Next button */
-#options-container button {
+#options-container.hangman button {
   margin-top: 1.5rem;
   padding: 0.5rem 1.2rem;
   font-size: 1rem;
@@ -949,18 +948,18 @@ h2 {
   transition: all 0.3s ease;
 }
 
-#options-container button:hover {
+#options-container.hangman button:hover {
   background-color: var(--red);
 }
 
 /* Responsive */
 @media (max-width: 500px) {
-  .hangman-word {
+  .hangman .hangman-word {
     font-size: 1.5rem;
     letter-spacing: 0.3rem;
   }
 
-  .letter {
+  .hangman .letter {
     width: 35px;
     height: 35px;
     font-size: 0.9rem;
