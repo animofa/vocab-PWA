@@ -146,7 +146,7 @@ function loadWord() {
   }
 
   // ✅ make sure letters are visible again
-  if (lettersEl) lettersEl.style.display = "block";
+  if (lettersEl) lettersEl.style.display = "flex";
 
   const card = cards[currentIndex];
   const { hint, answer } = getCardData(card);
