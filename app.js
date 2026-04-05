@@ -1,6 +1,7 @@
 import { loadVocabularyForLanguage } from "./language-manager.js";
 import { startMemoryGame } from "./memory.js";
 import { startHangmanGame } from "./hangman.js";
+import { startAudioMode } from "./audio.js";
 
 const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
 // Detect mode from URL
@@ -894,95 +895,13 @@ document.getElementById('close-menu').addEventListener('click', () => {
 
 
 ////////////////////////////////////////////////////////////
-// 🔊 AUDITIVE STUDY MODE
-////////////////////////////////////////////////////////////
-
-const synth = window.speechSynthesis;
-
-let isAudioModeRunning = false;
-let audioQueue = [];
-let currentAudioIndex = 0;
-
-// --- HARDCODED VOICE NAMES ---
-// You can console.log(synth.getVoices()) once to see exact names on your iPhone
-const FRONT_VOICE_NAME = "Anna";   // e.g. English
-const BACK_VOICE_NAME  = "Thomas";     // e.g. French
-
-function getVoiceByName(name) {
-  const voices = synth.getVoices();
-  return voices.find(v => v.name.includes(name) && v.localService);
-}
-
-function speakText(text, voice) {
-  return new Promise(resolve => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = voice;
-    utterance.onend = resolve;
-    synth.speak(utterance);
-  });
-}
-
-async function runAudioQueue() {
-  if (!audioQueue.length) return;
-
-  isAudioModeRunning = true;
-
-  const frontVoice = getVoiceByName(FRONT_VOICE_NAME);
-  const backVoice  = getVoiceByName(BACK_VOICE_NAME);
-
-  for (let i = 0; i < audioQueue.length; i++) {
-    if (!isAudioModeRunning) break;
-
-    const card = audioQueue[i];
-
-    // Speak front
-    await speakText(card.front, frontVoice);
-    await pause(800);
-
-    // Speak back
-    await speakText(card.back, backVoice);
-    await pause(1200);
-  }
-
-  isAudioModeRunning = false;
-}
-
-function pause(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function stopAudioMode() {
-  isAudioModeRunning = false;
-  synth.cancel();
-}
-
-////////////////////////////////////////////////////////////
 // 🎧 AUDIO BUTTON LISTENER
 ////////////////////////////////////////////////////////////
 
 document.querySelectorAll('.audio-btn').forEach(btn => {
-  btn.addEventListener('click', async function() {
-
+  btn.addEventListener('click', function() {
     const lesson = this.getAttribute('data-lesson');
-
-    // If already running → stop
-    if (isAudioModeRunning) {
-      stopAudioMode();
-      return;
-    }
-
-    // Get all vocabulary for that lesson
-    const lessonCards = vocabulary.filter(card => card.lesson === lesson);
-
-    if (!lessonCards.length) {
-      console.log("No vocabulary found for lesson:", lesson);
-      return;
-    }
-
-    audioQueue = lessonCards;
-    currentAudioIndex = 0;
-
-    runAudioQueue();
+    startAudioMode(lesson, vocabulary);
   });
 });
 
