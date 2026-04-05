@@ -202,6 +202,9 @@ function updateDotColor(card) {
 }
 
 function renderCard(card) {
+  cardContainer.classList.remove("hangman");
+  optionsContainer.classList.remove("hangman");
+
   cardContainer.textContent = card.front;
   optionsContainer.innerHTML = "";
   
@@ -512,6 +515,8 @@ function showNextCard() {
 nextBtn.addEventListener("click", showNextCard);
 
 document.addEventListener("hangmanFinished", () => {
+  cardContainer.classList.remove("hangman");
+  optionsContainer.classList.remove("hangman");
   nextBtn.style.display = "";
   showNextCard(); // continue normal flow
 });
