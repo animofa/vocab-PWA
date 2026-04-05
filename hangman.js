@@ -257,6 +257,7 @@ function handleSuccess(card) {
   nextBtn.style.display = "block";
 
   disableLetters();
+  card.status = "typed-correct"; 
 
 const isNewOrRoundOne = !card.lastSeen || card.round <= 1;
 
