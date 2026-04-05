@@ -515,6 +515,11 @@ function showNextCard() {
 nextBtn.addEventListener("click", showNextCard);
 
 document.addEventListener("hangmanFinished", () => {
+  const previousCard = cards[currentCardIndex - 1];
+
+  if (previousCard) {
+    updateDotColor(previousCard); // ✅ update progress color
+  }
   cardContainer.classList.remove("hangman");
   optionsContainer.classList.remove("hangman");
   nextBtn.style.display = "";
