@@ -251,7 +251,13 @@ function handleSuccess(card) {
 
   disableLetters();
 
-  card.round = getPromotedRound(card.round, card.lastSeen);
+  const isNewCard = !card.lastSeen || card.round === 0;
+
+  if (isNewCard) {
+    card.round = 2; // 🚀 fast-track new cards
+  } else {
+    card.round = getPromotedRound(card.round, card.lastSeen);
+  }
   card.lastSeen = new Date().toISOString();
   console.log(`hangman original: ${card.back} Round ${card.round} last ${card.lastSeen}`);
 
