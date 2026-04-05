@@ -140,17 +140,17 @@ function renderLetters() {
 
 function loadWord() {
   if (currentIndex >= cards.length) {
-  nextBtn.style.display = "block";
+    nextBtn.style.display = "block";
 
-  nextBtn.onclick = () => {
-    document.dispatchEvent(new Event("hangmanFinished"));
-  };
+    nextBtn.onclick = () => {
+      document.dispatchEvent(new Event("hangmanFinished"));
+    };
 
-  return;
-}
-    if (lettersEl) lettersEl.style.display = "none";
     return;
   }
+
+  // ✅ make sure letters are visible again
+  if (lettersEl) lettersEl.style.display = "block";
 
   const card = cards[currentIndex];
   const { hint, answer } = getCardData(card);
