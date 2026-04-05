@@ -136,7 +136,14 @@ function renderLetters() {
 
 function loadWord() {
   if (currentIndex >= cards.length) {
-    container.textContent = "🎉 Hangman session complete!";
+  nextBtn.style.display = "block";
+
+  nextBtn.onclick = () => {
+    document.dispatchEvent(new Event("hangmanFinished"));
+  };
+
+  return;
+}
     if (lettersEl) lettersEl.style.display = "none";
     return;
   }
