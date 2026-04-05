@@ -259,6 +259,8 @@ function handleSuccess(card) {
     lastSeen: card.lastSeen
   };
 
+  console.log(`hangman promoted: ${card.back} → Round ${newRound}`);
+
   saveCardRound(cardRound);
 }
 
