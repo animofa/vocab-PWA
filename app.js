@@ -511,6 +511,11 @@ function showNextCard() {
 
 nextBtn.addEventListener("click", showNextCard);
 
+document.addEventListener("hangmanFinished", () => {
+  nextBtn.style.display = "";
+  showNextCard(); // continue normal flow
+});
+
 
 
 
