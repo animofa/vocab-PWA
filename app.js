@@ -972,6 +972,12 @@ document.querySelectorAll('.hangman-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     console.log("Hangman button clicked");
 
+        // ✅ ADD THIS GUARD HERE
+    if (!Object.keys(cardRound).length) {
+      alert("Please wait, progress is still loading...");
+      return;
+    }
+
     const lesson = btn.getAttribute('data-lesson');
 
     // Filter lesson cards based on the selected lesson
