@@ -174,7 +174,7 @@ function getPromotedRound(currentRound, lastSeenDate) {
 
   let newRound = currentRound;
 
-  for (let i = currentRound + 1; i <= roundConfiguration.length; i++) {
+  for (let i = currentRound + 1; i <= roundConfiguration.length - 1; i++) {
     const previousCfg = roundConfiguration.find(r => r.round === i - 1);
     if (previousCfg && previousCfg.delay_days <= daysElapsed) {
       newRound = i;
