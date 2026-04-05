@@ -85,7 +85,7 @@ if (currentLanguage) {
 
 const roundConfiguration = [
   { round: 0, type: "multiple choice", delay_days: 0 }, // ← prep round
-  { round: 1, type: "typing", delay_days: 0 },
+  { round: 1, type: "hangman", delay_days: 0 },
   { round: 2, type: "typing", delay_days: 1 },
   { round: 3, type: "typing", delay_days: 3 },
   { round: 4, type: "typing", delay_days: 7 },
@@ -206,11 +206,24 @@ function renderCard(card) {
   optionsContainer.innerHTML = "";
   
 
- const roundCfg = roundConfiguration.find(cfg => cfg.round === card.round);
+const roundCfg = roundConfiguration.find(cfg => cfg.round === card.round);
 const isTypingRound = roundCfg && roundCfg.type === "typing";
+const isHangmanRound = roundCfg && roundCfg.type === "hangman";
+
+if (isHangmanRound) {
+  startHangmanGame({
+    cards: [card], // 👈 single card
+    getPromotedRound,
+    saveCardRound,
+    cardRound
+  });
+
+  nextBtn.style.display = "none"; // hide next (hangman controls flow)
+  return;
+}
 
 
-  if (!isTypingRound) {
+  if (!isTypingRound || !isHangmanRound) {
   // MULTIPLE CHOICE ROUND
   const options = getRandomOptions(card, vocabulary);
   optionsContainer.setAttribute('round', 'multiple-choice');
