@@ -259,12 +259,13 @@ function handleSuccess(card) {
   card.lastSeen = new Date().toISOString();
   console.log(`hangman original: ${card.back} Round ${card.round} last ${card.lastSeen}`);
 
+
   cardRound[currentWord] = {
     round: card.round,
     lastSeen: card.lastSeen
   };
 
-  console.log(`hangman promoted: ${card.back} → Round ${newRound}`);
+  console.log(`hangman promoted: ${card.back} → Round ${card.round}`);
 
   saveCardRound(cardRound);
 }
