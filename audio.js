@@ -6,7 +6,9 @@ let isAudioModeRunning = false;
 let audioQueue = [];
 let currentAudioIndex = 0;
 
-// --- HARDCODED VOICE NAMES ---
+let audioModal = null;
+let audioListContainer = null;
+
 const FRONT_VOICE_NAME = "Anna";
 const BACK_VOICE_NAME  = "Thomas";
 
@@ -28,6 +30,72 @@ function pause(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+////////////////////////////////////////////////////////////
+// 🧱 CREATE MODAL DYNAMICALLY
+////////////////////////////////////////////////////////////
+
+function createAudioModal() {
+  // Remove old one if exists
+  if (audioModal) {
+    audioModal.remove();
+  }
+
+  audioModal = document.createElement("div");
+  audioModal.className = "audio-modal";
+
+  const content = document.createElement("div");
+  content.className = "audio-content";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "✖";
+  closeBtn.className = "close-audio";
+
+  const title = document.createElement("h2");
+  title.textContent = "Audio Mode";
+
+  audioListContainer = document.createElement("div");
+  audioListContainer.className = "audio-list";
+
+  closeBtn.onclick = stopAudioMode;
+
+  content.appendChild(closeBtn);
+  content.appendChild(title);
+  content.appendChild(audioListContainer);
+  audioModal.appendChild(content);
+
+  document.body.appendChild(audioModal);
+}
+
+////////////////////////////////////////////////////////////
+// 📋 RENDER LIST
+////////////////////////////////////////////////////////////
+
+function renderAudioList() {
+  audioListContainer.innerHTML = "";
+
+  audioQueue.forEach((card, index) => {
+    const item = document.createElement("div");
+    item.className = "audio-item";
+    item.textContent = `${card.front} → ${card.back}`;
+
+    if (index === currentAudioIndex) {
+      item.classList.add("active");
+    }
+
+    audioListContainer.appendChild(item);
+  });
+}
+
+function updateActiveAudioItem() {
+  document.querySelectorAll(".audio-item").forEach((el, index) => {
+    el.classList.toggle("active", index === currentAudioIndex);
+  });
+}
+
+////////////////////////////////////////////////////////////
+// 🔊 AUDIO LOOP
+////////////////////////////////////////////////////////////
+
 async function runAudioQueue() {
   if (!audioQueue.length) return;
 
@@ -39,7 +107,13 @@ async function runAudioQueue() {
   for (let i = 0; i < audioQueue.length; i++) {
     if (!isAudioModeRunning) break;
 
+    currentAudioIndex = i;
+    updateActiveAudioItem();
+
     const card = audioQueue[i];
+
+    // ✅ console log
+    console.log(`Playing: ${card.front} → ${card.back}`);
 
     await speakText(card.front, frontVoice);
     await pause(800);
@@ -48,15 +122,23 @@ async function runAudioQueue() {
     await pause(1200);
   }
 
-  isAudioModeRunning = false;
+  stopAudioMode(); // auto-close when finished
 }
 
 function stopAudioMode() {
   isAudioModeRunning = false;
   synth.cancel();
+
+  if (audioModal) {
+    audioModal.remove();
+    audioModal = null;
+  }
 }
 
-// 👇 PUBLIC FUNCTION to start audio mode
+////////////////////////////////////////////////////////////
+// 🚀 START
+////////////////////////////////////////////////////////////
+
 function startAudioMode(lesson, vocabulary) {
   // toggle behavior
   if (isAudioModeRunning) {
@@ -73,6 +155,9 @@ function startAudioMode(lesson, vocabulary) {
 
   audioQueue = lessonCards;
   currentAudioIndex = 0;
+
+  createAudioModal();
+  renderAudioList();
 
   runAudioQueue();
 }
