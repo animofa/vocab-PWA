@@ -253,6 +253,7 @@ function handleSuccess(card) {
 
   card.round = getPromotedRound(card.round, card.lastSeen);
   card.lastSeen = new Date().toISOString();
+  console.log(`hangman original: ${card.back} Round ${card.round} last ${card.lastSeen}`);
 
   cardRound[currentWord] = {
     round: card.round,
