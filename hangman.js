@@ -255,9 +255,9 @@ function handleSuccess(card) {
 
   disableLetters();
 
-  const isNewCard = !card.lastSeen || card.round === 0;
+const isNewOrRoundOne = !card.lastSeen || card.round <= 1;
 
-  if (isNewCard) {
+if (isNewOrRoundOne) {
     card.round = 2; // 🚀 fast-track new cards
   } else {
     card.round = getPromotedRound(card.round, card.lastSeen);
