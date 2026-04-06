@@ -177,19 +177,18 @@ function renderWord() {
   const display = currentWord
     .split("")
     .map(letter => {
-      if (letter === " " || letter === "'") return " ";
+      // 👇 SHOW spaces and apostrophes automatically
+      if (letter === " " || letter === "'") return letter;
 
-      // normalize letter (ê → e)
       const normalizedLetter = letter
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 
-      // check if user guessed base letter
       const isGuessed = guessedLetters.some(g =>
         g.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedLetter
       );
 
-      return isGuessed ? letter : "_"; // 👈 show ORIGINAL (ê, ä, etc.)
+      return isGuessed ? letter : "_";
     })
     .join(" ");
 
