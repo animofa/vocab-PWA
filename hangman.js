@@ -245,9 +245,20 @@ function handleKeyPress(e) {
 ////////////////////////////////////////////////////////////
 
 function checkGameState() {
-  const isWordComplete = currentWord
-    .split("")
-    .every(l => l === " " || guessedLetters.includes(l));
+const isWordComplete = currentWord
+  .split("")
+  .every(l => {
+    // auto-pass for spaces & punctuation
+    if (" '-.,!?".includes(l)) return true;
+
+    const normalizedLetter = l
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    return guessedLetters.some(g =>
+      g.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedLetter
+    );
+  });
 
   const card = cards[currentIndex];
 
