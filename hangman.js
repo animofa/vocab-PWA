@@ -174,7 +174,18 @@ function renderWord() {
     .split("")
     .map(letter => {
       if (letter === " " || letter === "'") return " ";
-      return guessedLetters.includes(letter) ? letter : "_";
+
+      // normalize letter (ê → e)
+      const normalizedLetter = letter
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      // check if user guessed base letter
+      const isGuessed = guessedLetters.some(g =>
+        g.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedLetter
+      );
+
+      return isGuessed ? letter : "_"; // 👈 show ORIGINAL (ê, ä, etc.)
     })
     .join(" ");
 
