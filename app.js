@@ -833,7 +833,7 @@ function showLessonsForLevel(level) {
     } else if (level === 'B1.2') {
       show = /^B1\.(8|9|10|11|12|13|14)$/.test(lesson);
     } else if (level === 'B2.1') {
-      show = /^B2\.(1|2|3|4|5|6)$/.test(lesson);
+      show = /^B2\.[1-6]$/.test(lesson);
     } else if (level === 'B2.2') {
       show = /^B2\.(7|8|9|10|11|12)$/.test(lesson);
     } else if (level === 'fr') {
