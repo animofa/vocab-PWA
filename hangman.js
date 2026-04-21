@@ -179,6 +179,7 @@ function renderWord() {
       const normalizedLetter = letter
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
+        .replace(/ß/g, "s");
 
       const isGuessed = guessedLetters.some(g =>
         g.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedLetter
