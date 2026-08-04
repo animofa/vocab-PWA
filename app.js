@@ -778,14 +778,23 @@ document.getElementById('close-study').addEventListener('click', function() {
   document.getElementById('next-btn').disabled = true;
 });
 
-document.getElementById('close-audio').addEventListener('click', () => {
-  showDashboard();
+const closeAudioBtn = document.getElementById('close-audio');
 
-  document.getElementById('card-container').textContent = '';
-  document.getElementById('options-container').innerHTML = '';
-  document.getElementById('pause-btn').disabled = true;
-  document.getElementById('next-btn').disabled = true;
-});
+if (closeAudioBtn) {
+  closeAudioBtn.addEventListener('click', () => {
+    showDashboard();
+
+    const cardContainer = document.getElementById('card-container');
+    const optionsContainer = document.getElementById('options-container');
+    const pauseBtn = document.getElementById('pause-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    if (cardContainer) cardContainer.textContent = '';
+    if (optionsContainer) optionsContainer.innerHTML = '';
+    if (pauseBtn) pauseBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
+  });
+}
 
 // On page load, show dashboard and hide study mode
 showDashboard();
