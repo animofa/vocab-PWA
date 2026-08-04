@@ -30,8 +30,17 @@ function speakText(text, voice, rate = 1) {
     utterance.voice = voice;
     utterance.rate = rate;
 
-    utterance.onend = resolve;
-    utterance.onerror = resolve;
+    let finished = false;
+
+    const done = () => {
+      if (!finished) {
+        finished = true;
+        resolve();
+      }
+    };
+
+    utterance.onend = done;
+    utterance.onerror = done;
 
     synth.speak(utterance);
   });
@@ -104,7 +113,7 @@ function createAudioModal() {
   // Pause button
   const pauseBtn = document.createElement("button");
   pauseBtn.id = "pause-btn";
-  pauseBtn.disabled = true;
+  pauseBtn.disabled = false;
   pauseBtn.textContent = "pause";
 
   pauseBtn.onclick = () => {
@@ -122,14 +131,15 @@ function createAudioModal() {
   // Next button
   const nextBtn = document.createElement("button");
   nextBtn.id = "next-btn";
-  nextBtn.disabled = true;
+  nextBtn.disabled = false;
   nextBtn.textContent = "weiter";
 
   nextBtn.onclick = () => {
   synth.cancel();
 
-  if (currentAudioIndex < audioQueue.length - 1) {
-    currentAudioIndex++;
+  currentAudioIndex++;
+
+  if (currentAudioIndex < audioQueue.length) {
     updateCurrentCard(audioQueue[currentAudioIndex]);
   } else {
     stopAudioMode();
@@ -183,7 +193,7 @@ while (currentAudioIndex < audioQueue.length && isAudioModeRunning) {
   if (!isAudioModeRunning) break;
 
 
-    const card = audioQueue[i];
+    const card = audioQueue[currentAudioIndex];
 
     updateCurrentCard(card);
 
@@ -212,6 +222,7 @@ if (!isAudioModeRunning) break;
 // French ×1
 await speakText(card.back, backVoice, 0.8);
 await pause(1800);
+  currentAudioIndex++;
   }
 
   stopAudioMode(); // auto-close when finished
