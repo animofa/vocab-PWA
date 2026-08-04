@@ -129,15 +129,17 @@ function createAudioModal() {
 ////////////////////////////////////////////////////////////
 
 function updateCurrentCard(card) {
-
-  document.getElementById("audio-current-word").textContent =
+  audioListContainer.textContent =
     `🇫🇷 ${card.back}`;
 
-  document.getElementById("audio-current-translation").textContent =
-    `🇩🇪 ${card.front}`;
-
-  document.getElementById("audio-progress").textContent =
-    `${currentAudioIndex + 1} / ${audioQueue.length}`;
+  audioListContainer.innerHTML += `
+    <div class="answers">
+      🇩🇪 ${card.front}
+    </div>
+    <div>
+      ${currentAudioIndex + 1} / ${audioQueue.length}
+    </div>
+  `;
 }
 
 ////////////////////////////////////////////////////////////
