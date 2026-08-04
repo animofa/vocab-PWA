@@ -13,6 +13,8 @@ let currentAudioIndex = 0;
 let audioModal = null;
 let audioListContainer = null;
 
+let skipToNext = false;
+
 const FRONT_VOICE_NAME = "Anna";
 const BACK_VOICE_NAME  = "Thomas";
 
@@ -21,11 +23,16 @@ function getVoiceByName(name) {
   return voices.find(v => v.name.includes(name) && v.localService);
 }
 
-function speakText(text, voice) {
+function speakText(text, voice, rate = 1) {
   return new Promise(resolve => {
     const utterance = new SpeechSynthesisUtterance(text);
+
     utterance.voice = voice;
+    utterance.rate = rate;
+
     utterance.onend = resolve;
+    utterance.onerror = resolve;
+
     synth.speak(utterance);
   });
 }
@@ -101,9 +108,16 @@ function createAudioModal() {
   pauseBtn.textContent = "pause";
 
   pauseBtn.onclick = () => {
-    isPaused = !isPaused;
-    pauseBtn.textContent = isPaused ? "resume" : "pause";
-  };
+  isPaused = !isPaused;
+
+  if (isPaused) {
+    synth.pause();
+    pauseBtn.textContent = "resume";
+  } else {
+    synth.resume();
+    pauseBtn.textContent = "pause";
+  }
+};
 
   // Next button
   const nextBtn = document.createElement("button");
@@ -112,6 +126,8 @@ function createAudioModal() {
   nextBtn.textContent = "weiter";
 
   nextBtn.onclick = () => {
+  synth.cancel();
+
   if (currentAudioIndex < audioQueue.length - 1) {
     currentAudioIndex++;
     updateCurrentCard(audioQueue[currentAudioIndex]);
@@ -163,10 +179,9 @@ async function runAudioQueue() {
   const frontVoice = getVoiceByName(FRONT_VOICE_NAME);
   const backVoice  = getVoiceByName(BACK_VOICE_NAME);
 
-  for (let i = 0; i < audioQueue.length; i++) {
-    if (!isAudioModeRunning) break;
+while (currentAudioIndex < audioQueue.length && isAudioModeRunning) {
+  if (!isAudioModeRunning) break;
 
-    currentAudioIndex = i;
 
     const card = audioQueue[i];
 
@@ -180,23 +195,23 @@ for (let j = 0; j < 3; j++) {
   await waitWhilePaused();
   if (!isAudioModeRunning) break;
 
-  await speakText(card.back, backVoice);
-  await pause(700);
+  await speakText(card.back, backVoice, 0.8);
+  await pause(1200);
 }
 
 await waitWhilePaused();
 if (!isAudioModeRunning) break;
 
 // German ×1
-await speakText(card.front, frontVoice);
-await pause(900);
+await speakText(card.front, frontVoice, 1);
+await pause(1200);
 
 await waitWhilePaused();
 if (!isAudioModeRunning) break;
 
 // French ×1
-await speakText(card.back, backVoice);
-await pause(1200);
+await speakText(card.back, backVoice, 0.8);
+await pause(1800);
   }
 
   stopAudioMode(); // auto-close when finished
