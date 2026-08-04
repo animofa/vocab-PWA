@@ -780,8 +780,12 @@ document.getElementById('close-study').addEventListener('click', function() {
 });
 
 document.getElementById('close-audio').addEventListener('click', () => {
-  document.getElementById('audio-mode').style.display = 'none';
   showDashboard();
+
+  document.getElementById('card-container').textContent = '';
+  document.getElementById('options-container').innerHTML = '';
+  document.getElementById('pause-btn').disabled = true;
+  document.getElementById('next-btn').disabled = true;
 });
 
 // On page load, show dashboard and hide study mode
@@ -914,6 +918,9 @@ document.getElementById('close-menu').addEventListener('click', () => {
 document.querySelectorAll('.audio-btn').forEach(btn => {
   btn.addEventListener('click', function() {
     const lesson = this.getAttribute('data-lesson');
+
+    showAudioMode();
+
     startAudioMode(lesson, vocabulary);
   });
 });
