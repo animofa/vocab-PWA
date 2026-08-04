@@ -48,47 +48,78 @@ function createAudioModal() {
     audioModal.remove();
   }
 
+  const app = document.querySelector(".app");
+
+  if (!app) {
+    console.error("No element with class 'app' found.");
+    return;
+  }
+
+  // Outer audio mode wrapper
   audioModal = document.createElement("div");
-  audioModal.className = "audio-modal";
+  audioModal.id = "audio-mode";
+  audioModal.style.display = "block";
+  audioModal.style.position = "relative";
 
-  const content = document.createElement("div");
-  content.className = "audio-content";
+  // Card
+  const card = document.createElement("div");
+  card.className = "card";
+  card.id = "questions";
 
+  // Close button
   const closeBtn = document.createElement("button");
-  closeBtn.textContent = "✖";
-  closeBtn.className = "close-audio";
+  closeBtn.id = "close-audio";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.style.position = "absolute";
+  closeBtn.style.top = "10px";
+  closeBtn.style.right = "10px";
+  closeBtn.style.fontSize = "1.5rem";
+  closeBtn.style.background = "none";
+  closeBtn.style.border = "none";
+  closeBtn.style.cursor = "pointer";
+  closeBtn.style.zIndex = "1";
+  closeBtn.style.color = "black";
   closeBtn.onclick = stopAudioMode;
 
-  const title = document.createElement("h2");
-  title.textContent = "Audio Mode";
-
+  // Question area
   audioListContainer = document.createElement("div");
-  audioListContainer.className = "audio-list";
+  audioListContainer.className = "question";
+  audioListContainer.id = "card-container";
 
-  const controls = document.createElement("div");
-  controls.className = "audio-controls";
+  // Answers area (keeps same structure as study mode)
+  const answers = document.createElement("div");
+  answers.className = "answers";
+  answers.id = "options-container";
+  answers.setAttribute("round", "");
 
+  // Pause button
   const pauseBtn = document.createElement("button");
-  pauseBtn.id = "pause-audio";
-  pauseBtn.textContent = "⏸ Pause";
+  pauseBtn.id = "pause-btn";
+  pauseBtn.disabled = true;
+  pauseBtn.textContent = "pause";
 
   pauseBtn.onclick = () => {
     isPaused = !isPaused;
-    pauseBtn.textContent = isPaused
-      ? "▶ Resume"
-      : "⏸ Pause";
+    pauseBtn.textContent = isPaused ? "resume" : "pause";
   };
 
-  controls.appendChild(pauseBtn);
+  // Next button
+  const nextBtn = document.createElement("button");
+  nextBtn.id = "next-btn";
+  nextBtn.disabled = true;
+  nextBtn.textContent = "weiter";
 
-  content.appendChild(closeBtn);
-  content.appendChild(title);
-  content.appendChild(audioListContainer);
-  content.appendChild(controls);
+  // Build DOM
+  card.appendChild(closeBtn);
+  card.appendChild(audioListContainer);
+  card.appendChild(answers);
+  card.appendChild(pauseBtn);
+  card.appendChild(nextBtn);
 
-  audioModal.appendChild(content);
+  audioModal.appendChild(card);
 
-  document.body.appendChild(audioModal);
+  // Insert into app
+  app.appendChild(audioModal);
 }
 
 ////////////////////////////////////////////////////////////
