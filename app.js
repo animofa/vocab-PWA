@@ -763,6 +763,12 @@ async function showStudyMode() {
   document.getElementById('study-mode').style.display = '';
 }
 
+function showAudioMode() {
+  document.querySelector('.dashboard').style.display = 'none';
+  document.getElementById('study-mode').style.display = 'none';
+  document.getElementById('audio-mode').style.display = '';
+}
+
 // Close study mode and return to dashboard
 document.getElementById('close-study').addEventListener('click', function() {
   showDashboard();
@@ -771,6 +777,11 @@ document.getElementById('close-study').addEventListener('click', function() {
   document.getElementById('options-container').innerHTML = '';
   document.getElementById('progress-bar').innerHTML = '';
   document.getElementById('next-btn').disabled = true;
+});
+
+document.getElementById('close-audio').addEventListener('click', () => {
+  document.getElementById('audio-mode').style.display = 'none';
+  showDashboard();
 });
 
 // On page load, show dashboard and hide study mode
