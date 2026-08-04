@@ -111,6 +111,15 @@ function createAudioModal() {
   nextBtn.disabled = true;
   nextBtn.textContent = "weiter";
 
+  nextBtn.onclick = () => {
+  if (currentAudioIndex < audioQueue.length - 1) {
+    currentAudioIndex++;
+    updateCurrentCard(audioQueue[currentAudioIndex]);
+  } else {
+    stopAudioMode();
+  }
+};
+
   // Build DOM
   card.appendChild(closeBtn);
   card.appendChild(audioListContainer);
