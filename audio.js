@@ -1,5 +1,7 @@
 // audio.js
 
+
+
 const synth = window.speechSynthesis;
 
 let isAudioModeRunning = false;
@@ -7,6 +9,9 @@ let isPaused = false;
 
 let audioQueue = [];
 let currentAudioIndex = 0;
+
+let audioModal = null;
+let audioListContainer = null;
 
 const FRONT_VOICE_NAME = "Anna";
 const BACK_VOICE_NAME  = "Thomas";
@@ -124,15 +129,17 @@ function createAudioModal() {
 ////////////////////////////////////////////////////////////
 
 function updateCurrentCard(card) {
-
-  document.getElementById("audio-current-word").textContent =
+  audioListContainer.textContent =
     `🇫🇷 ${card.back}`;
 
-  document.getElementById("audio-current-translation").textContent =
-    `🇩🇪 ${card.front}`;
-
-  document.getElementById("audio-progress").textContent =
-    `${currentAudioIndex + 1} / ${audioQueue.length}`;
+  audioListContainer.innerHTML += `
+    <div class="answers">
+      🇩🇪 ${card.front}
+    </div>
+    <div>
+      ${currentAudioIndex + 1} / ${audioQueue.length}
+    </div>
+  `;
 }
 
 ////////////////////////////////////////////////////////////
