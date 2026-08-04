@@ -136,11 +136,28 @@ async function runAudioQueue() {
     // ✅ console log
     console.log(`Playing: ${card.front} → ${card.back}`);
 
-    await speakText(card.front, frontVoice);
-    await pause(800);
+// French ×3
+for (let j = 0; j < 3; j++) {
+  await waitWhilePaused();
+  if (!isAudioModeRunning) break;
 
-    await speakText(card.back, backVoice);
-    await pause(1200);
+  await speakText(card.back, backVoice);
+  await pause(700);
+}
+
+await waitWhilePaused();
+if (!isAudioModeRunning) break;
+
+// German ×1
+await speakText(card.front, frontVoice);
+await pause(900);
+
+await waitWhilePaused();
+if (!isAudioModeRunning) break;
+
+// French ×1
+await speakText(card.back, backVoice);
+await pause(1200);
   }
 
   stopAudioMode(); // auto-close when finished
