@@ -8,9 +8,6 @@ let isPaused = false;
 let audioQueue = [];
 let currentAudioIndex = 0;
 
-let audioModal = null;
-let audioListContainer = null;
-
 const FRONT_VOICE_NAME = "Anna";
 const BACK_VOICE_NAME  = "Thomas";
 
@@ -42,54 +39,7 @@ async function waitWhilePaused() {
 // 🧱 CREATE MODAL DYNAMICALLY
 ////////////////////////////////////////////////////////////
 
-function createAudioModal() {
 
-  if (audioModal) {
-    audioModal.remove();
-  }
-
-  audioModal = document.createElement("div");
-  audioModal.className = "audio-modal";
-
-  const content = document.createElement("div");
-  content.className = "audio-content";
-
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "✖";
-  closeBtn.className = "close-audio";
-  closeBtn.onclick = stopAudioMode;
-
-  const title = document.createElement("h2");
-  title.textContent = "Audio Mode";
-
-  audioListContainer = document.createElement("div");
-  audioListContainer.className = "audio-list";
-
-  const controls = document.createElement("div");
-  controls.className = "audio-controls";
-
-  const pauseBtn = document.createElement("button");
-  pauseBtn.id = "pause-audio";
-  pauseBtn.textContent = "⏸ Pause";
-
-  pauseBtn.onclick = () => {
-    isPaused = !isPaused;
-    pauseBtn.textContent = isPaused
-      ? "▶ Resume"
-      : "⏸ Pause";
-  };
-
-  controls.appendChild(pauseBtn);
-
-  content.appendChild(closeBtn);
-  content.appendChild(title);
-  content.appendChild(audioListContainer);
-  content.appendChild(controls);
-
-  audioModal.appendChild(content);
-
-  document.body.appendChild(audioModal);
-}
 
 ////////////////////////////////////////////////////////////
 // 📋 RENDER LIST
@@ -97,19 +47,14 @@ function createAudioModal() {
 
 function updateCurrentCard(card) {
 
-  audioListContainer.innerHTML = `
-    <div class="audio-current-word">
-      🇫🇷 ${card.back}
-    </div>
+  document.getElementById("audio-current-word").textContent =
+    `🇫🇷 ${card.back}`;
 
-    <div class="audio-current-translation">
-      🇩🇪 ${card.front}
-    </div>
+  document.getElementById("audio-current-translation").textContent =
+    `🇩🇪 ${card.front}`;
 
-    <div class="audio-progress">
-      ${currentAudioIndex + 1} / ${audioQueue.length}
-    </div>
-  `;
+  document.getElementById("audio-progress").textContent =
+    `${currentAudioIndex + 1} / ${audioQueue.length}`;
 }
 
 ////////////////////////////////////////////////////////////
