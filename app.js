@@ -766,7 +766,6 @@ async function showStudyMode() {
 function showAudioMode() {
   document.querySelector('.dashboard').style.display = 'none';
   document.getElementById('study-mode').style.display = 'none';
-  document.getElementById('audio-mode').style.display = '';
 }
 
 // Close study mode and return to dashboard
