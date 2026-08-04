@@ -135,12 +135,9 @@ function createAudioModal() {
   nextBtn.textContent = "weiter";
 
   nextBtn.onclick = () => {
-  synth.cancel();
-
-  currentAudioIndex++;
-
-  if (currentAudioIndex < audioQueue.length) {
-    updateCurrentCard(audioQueue[currentAudioIndex]);
+  if (currentAudioIndex < audioQueue.length - 1) {
+    skipToNext = true;
+    synth.cancel();   // immediately stop current speech
   } else {
     stopAudioMode();
   }
@@ -190,12 +187,11 @@ async function runAudioQueue() {
   const backVoice  = getVoiceByName(BACK_VOICE_NAME);
 
 while (currentAudioIndex < audioQueue.length && isAudioModeRunning) {
-  if (!isAudioModeRunning) break;
 
+  skipToNext = false;
 
-    const card = audioQueue[currentAudioIndex];
-
-    updateCurrentCard(card);
+  const card = audioQueue[currentAudioIndex];
+  updateCurrentCard(card);
 
     // ✅ console log
     console.log(`Playing: ${card.front} → ${card.back}`);
@@ -206,7 +202,17 @@ for (let j = 0; j < 3; j++) {
   if (!isAudioModeRunning) break;
 
   await speakText(card.back, backVoice, 0.8);
+
+  if (skipToNext) break;
+
   await pause(1200);
+
+  if (skipToNext) break;
+}
+
+if (skipToNext) {
+  currentAudioIndex++;
+  continue;
 }
 
 await waitWhilePaused();
@@ -214,14 +220,33 @@ if (!isAudioModeRunning) break;
 
 // German ×1
 await speakText(card.front, frontVoice, 1);
+
+if (skipToNext) {
+  currentAudioIndex++;
+  continue;
+}
+
 await pause(1200);
 
-await waitWhilePaused();
-if (!isAudioModeRunning) break;
+if (skipToNext) {
+  currentAudioIndex++;
+  continue;
+}
 
 // French ×1
 await speakText(card.back, backVoice, 0.8);
+
+if (skipToNext) {
+  currentAudioIndex++;
+  continue;
+}
+
 await pause(1800);
+
+if (skipToNext) {
+  currentAudioIndex++;
+  continue;
+}
   currentAudioIndex++;
   }
 
