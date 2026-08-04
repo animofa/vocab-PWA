@@ -8,9 +8,6 @@ let isPaused = false;
 let audioQueue = [];
 let currentAudioIndex = 0;
 
-let audioModal = null;
-let audioListContainer = null;
-
 const FRONT_VOICE_NAME = "Anna";
 const BACK_VOICE_NAME  = "Thomas";
 
@@ -128,19 +125,14 @@ function createAudioModal() {
 
 function updateCurrentCard(card) {
 
-  audioListContainer.innerHTML = `
-    <div class="audio-current-word">
-      🇫🇷 ${card.back}
-    </div>
+  document.getElementById("audio-current-word").textContent =
+    `🇫🇷 ${card.back}`;
 
-    <div class="audio-current-translation">
-      🇩🇪 ${card.front}
-    </div>
+  document.getElementById("audio-current-translation").textContent =
+    `🇩🇪 ${card.front}`;
 
-    <div class="audio-progress">
-      ${currentAudioIndex + 1} / ${audioQueue.length}
-    </div>
-  `;
+  document.getElementById("audio-progress").textContent =
+    `${currentAudioIndex + 1} / ${audioQueue.length}`;
 }
 
 ////////////////////////////////////////////////////////////
