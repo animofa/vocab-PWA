@@ -755,7 +755,13 @@ async function updateLessonProgressBars() {
 async function showDashboard() {
   document.querySelector('.dashboard').style.display = '';
   document.getElementById('study-mode').style.display = 'none';
-  await updateLessonProgressBars();
+
+  const audioMode = document.getElementById('audio-mode');
+  if (audioMode) {
+    audioMode.style.display = 'none';
+  }
+
+  updateLessonProgressBars();
 }
 
 async function showStudyMode() {
@@ -989,7 +995,7 @@ document.querySelectorAll('.hangman-btn').forEach(btn => {
   });
 });
 
-export { getPromotedRound, saveCardRound, loadCardRound };
+export { getPromotedRound, saveCardRound, loadCardRound, showDashboard };
 export function getVocabularyForLesson(lesson) {
   return vocabulary.filter(card => card.lesson === lesson);
 }
