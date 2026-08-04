@@ -1,6 +1,6 @@
 // audio.js
 
-
+import { showDashboard } from "./app.js";
 
 const synth = window.speechSynthesis;
 
@@ -210,6 +210,9 @@ function stopAudioMode() {
     audioModal.remove();
     audioModal = null;
   }
+
+  showDashboard();
+}
 }
 
 ////////////////////////////////////////////////////////////
