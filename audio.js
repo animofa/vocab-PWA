@@ -1,5 +1,7 @@
 // audio.js
 
+
+
 const synth = window.speechSynthesis;
 
 let isAudioModeRunning = false;
@@ -7,6 +9,9 @@ let isPaused = false;
 
 let audioQueue = [];
 let currentAudioIndex = 0;
+
+let audioModal = null;
+let audioListContainer = null;
 
 const FRONT_VOICE_NAME = "Anna";
 const BACK_VOICE_NAME  = "Thomas";
