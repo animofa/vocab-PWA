@@ -903,9 +903,11 @@ document.querySelectorAll('.level-btn').forEach(btn => {
 });
 
 document.getElementById('menu-btn').addEventListener('click', () => {
+  console.log("open Menu");
   document.getElementById('menu-modal').style.display = 'flex';
 });
 document.getElementById('close-menu').addEventListener('click', () => {
+  console.log("close menu");
   document.getElementById('menu-modal').style.display = 'none';
 });
 
