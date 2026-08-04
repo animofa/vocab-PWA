@@ -3,6 +3,8 @@
 const synth = window.speechSynthesis;
 
 let isAudioModeRunning = false;
+let isPaused = false;
+
 let audioQueue = [];
 let currentAudioIndex = 0;
 
@@ -30,12 +32,18 @@ function pause(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function waitWhilePaused() {
+  while (isPaused && isAudioModeRunning) {
+    await pause(100);
+  }
+}
+
 ////////////////////////////////////////////////////////////
 // 🧱 CREATE MODAL DYNAMICALLY
 ////////////////////////////////////////////////////////////
 
 function createAudioModal() {
-  // Remove old one if exists
+
   if (audioModal) {
     audioModal.remove();
   }
@@ -49,6 +57,7 @@ function createAudioModal() {
   const closeBtn = document.createElement("button");
   closeBtn.textContent = "✖";
   closeBtn.className = "close-audio";
+  closeBtn.onclick = stopAudioMode;
 
   const title = document.createElement("h2");
   title.textContent = "Audio Mode";
@@ -56,11 +65,27 @@ function createAudioModal() {
   audioListContainer = document.createElement("div");
   audioListContainer.className = "audio-list";
 
-  closeBtn.onclick = stopAudioMode;
+  const controls = document.createElement("div");
+  controls.className = "audio-controls";
+
+  const pauseBtn = document.createElement("button");
+  pauseBtn.id = "pause-audio";
+  pauseBtn.textContent = "⏸ Pause";
+
+  pauseBtn.onclick = () => {
+    isPaused = !isPaused;
+    pauseBtn.textContent = isPaused
+      ? "▶ Resume"
+      : "⏸ Pause";
+  };
+
+  controls.appendChild(pauseBtn);
 
   content.appendChild(closeBtn);
   content.appendChild(title);
   content.appendChild(audioListContainer);
+  content.appendChild(controls);
+
   audioModal.appendChild(content);
 
   document.body.appendChild(audioModal);
@@ -70,26 +95,21 @@ function createAudioModal() {
 // 📋 RENDER LIST
 ////////////////////////////////////////////////////////////
 
-function renderAudioList() {
-  audioListContainer.innerHTML = "";
+function updateCurrentCard(card) {
 
-  audioQueue.forEach((card, index) => {
-    const item = document.createElement("div");
-    item.className = "audio-item";
-    item.textContent = `${card.front} → ${card.back}`;
+  audioListContainer.innerHTML = `
+    <div class="audio-current-word">
+      🇫🇷 ${card.back}
+    </div>
 
-    if (index === currentAudioIndex) {
-      item.classList.add("active");
-    }
+    <div class="audio-current-translation">
+      🇩🇪 ${card.front}
+    </div>
 
-    audioListContainer.appendChild(item);
-  });
-}
-
-function updateActiveAudioItem() {
-  document.querySelectorAll(".audio-item").forEach((el, index) => {
-    el.classList.toggle("active", index === currentAudioIndex);
-  });
+    <div class="audio-progress">
+      ${currentAudioIndex + 1} / ${audioQueue.length}
+    </div>
+  `;
 }
 
 ////////////////////////////////////////////////////////////
@@ -108,9 +128,10 @@ async function runAudioQueue() {
     if (!isAudioModeRunning) break;
 
     currentAudioIndex = i;
-    updateActiveAudioItem();
 
     const card = audioQueue[i];
+
+    updateCurrentCard(card);
 
     // ✅ console log
     console.log(`Playing: ${card.front} → ${card.back}`);
@@ -156,10 +177,10 @@ function startAudioMode(lesson, vocabulary) {
   audioQueue = lessonCards;
   currentAudioIndex = 0;
 
-  createAudioModal();
-  renderAudioList();
+createAudioModal();
+updateCurrentCard(audioQueue[0]);
 
-  runAudioQueue();
+runAudioQueue();
 }
 
 export { startAudioMode };
