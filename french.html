@@ -330,6 +330,34 @@
     </div>
     <div id="progress-bar"></div>
   </div>
+
+<div id="audio-mode" style="display:none; position:relative;">
+  <div class="card" id="audio-card">
+
+    <button id="close-audio" 
+      style="position:absolute;top:10px;right:10px;font-size:1.5rem;background:none;border:none;cursor:pointer;color:black">
+      &times;
+    </button>
+
+    <h2>Audio Mode</h2>
+
+    <div id="audio-current-word" class="question">
+      🇫🇷
+    </div>
+
+    <div id="audio-current-translation" class="answers">
+      🇩🇪
+    </div>
+
+    <div id="audio-progress"></div>
+
+    <button id="pause-audio">
+      ⏸ Pause
+    </button>
+
+  </div>
+</div>
+    
   </div>
   <script type="module" src="app.js"></script>
 </body>
