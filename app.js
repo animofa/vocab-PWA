@@ -3,999 +3,3104 @@ import { startMemoryGame } from "./memory.js";
 import { startHangmanGame } from "./hangman.js";
 import { startAudioMode } from "./audio.js";
 
-const CACHE_NAME = 'vocab-pwa-v1'; // Must match the CACHE_NAME in service-worker.js
-// Detect mode from URL
-const isFrenchMode = window.location.pathname.startsWith('/french');
+////////////////////////////////////////////////////////////
+// APP CONFIGURATION
+////////////////////////////////////////////////////////////
 
+const CACHE_NAME = "vocab-pwa-v1";
+
+const isFrenchMode = window.location.pathname.startsWith("/french");
+
+
+////////////////////////////////////////////////////////////
+// CACHE MANAGEMENT
+////////////////////////////////////////////////////////////
 
 async function checkAndUpdateCache() {
-  const storedCacheName = localStorage.getItem('CACHE_NAME');
-  if (storedCacheName !== CACHE_NAME) {
-    // Delete all caches except the new one
-    if ('caches' in window) {
+  const storedCacheName = localStorage.getItem("CACHE_NAME");
+
+  if (storedCacheName === CACHE_NAME) {
+    return;
+  }
+
+  if ("caches" in window) {
+    try {
       const cacheNames = await caches.keys();
+
       await Promise.all(
         cacheNames
           .filter(name => name !== CACHE_NAME)
           .map(name => caches.delete(name))
       );
-      // Open new cache and add files
+
       const cache = await caches.open(CACHE_NAME);
+
       await cache.addAll([
-        './manifest.json',
-        './icons/ios/180.png',
-        './icons/android/android-launchericon-192-192.png',
-        './icons/android/android-launchericon-512-512.png'
+        "./manifest.json",
+        "./icons/ios/180.png",
+        "./icons/android/android-launchericon-192-192.png",
+        "./icons/android/android-launchericon-512-512.png"
       ]);
+
+    } catch (error) {
+      console.error("Cache update failed:", error);
     }
-    localStorage.setItem('CACHE_NAME', CACHE_NAME);
-    // Optionally reload to use new files
-    window.location.reload();
   }
+
+  localStorage.setItem("CACHE_NAME", CACHE_NAME);
 }
 
-// Run this check on page load
-checkAndUpdateCache();
+
+////////////////////////////////////////////////////////////
+// LANGUAGE MANAGEMENT
+////////////////////////////////////////////////////////////
 
 function getSavedLanguage() {
-  return localStorage.getItem('selectedLanguage');
-}
-function saveLanguage(lang) {
-  localStorage.setItem('selectedLanguage', lang);
+  return localStorage.getItem("selectedLanguage");
 }
 
-// Get current language or default to 'en'
+
+function saveLanguage(language) {
+  localStorage.setItem("selectedLanguage", language);
+}
+
+
 let currentLanguage;
 
+
 if (isFrenchMode) {
-  currentLanguage = 'french'; // 👈 fixed language
+
+  // French version has fixed language
+  currentLanguage = "french";
+
 } else {
-  currentLanguage = getSavedLanguage() || null;
+
+  currentLanguage = getSavedLanguage();
+
   if (!currentLanguage) {
-    document.getElementById('menu-modal').style.display = 'flex';
+    const menu = document.getElementById("menu-modal");
+    if (menu) {
+      menu.style.display = "flex";
+    }
   }
 }
 
 
 let vocabulary = [];
 
+
 async function initVocabulary() {
-  const lang = currentLanguage || "en";
-  vocabulary = await loadVocabularyForLanguage(lang);
+
+  const language = currentLanguage || "en";
+
+  vocabulary = await loadVocabularyForLanguage(language);
+
+  console.log(
+    "Vocabulary loaded:",
+    vocabulary.length,
+    "cards"
+  );
 }
 
 
-// Add event listeners to language buttons
 
-  document.querySelectorAll('.language-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      saveLanguage(this.getAttribute('data-language'));
-      location.reload();
+////////////////////////////////////////////////////////////
+// LANGUAGE BUTTONS
+////////////////////////////////////////////////////////////
+
+function setupLanguageButtons() {
+
+  document
+    .querySelectorAll(".language-btn")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        document
+          .querySelectorAll(".language-btn")
+          .forEach(btn =>
+            btn.classList.remove("active")
+          );
+
+
+        button.classList.add("active");
+
+
+        saveLanguage(
+          button.getAttribute("data-language")
+        );
+
+
+        location.reload();
+
+      });
+
     });
-  });
 
 
+  if (currentLanguage) {
 
-// Highlight selected language on load
-if (currentLanguage) {
-  const btn = document.querySelector(`.language-btn[data-language="${currentLanguage}"]`);
-  if (btn) btn.classList.add('active');
+    const activeButton =
+      document.querySelector(
+        `.language-btn[data-language="${currentLanguage}"]`
+      );
+
+
+    if (activeButton) {
+      activeButton.classList.add("active");
+    }
+  }
 }
+
+
+
+////////////////////////////////////////////////////////////
+// SPACED REPETITION CONFIGURATION
+////////////////////////////////////////////////////////////
 
 const roundConfiguration = [
-  { round: 0, type: "multiple choice", delay_days: 0 }, // ← prep round
-  { round: 1, type: "hangman", delay_days: 0 },
-  { round: 2, type: "typing", delay_days: 1 },
-  { round: 3, type: "typing", delay_days: 3 },
-  { round: 4, type: "typing", delay_days: 7 },
-  { round: 5, type: "typing", delay_days: 14 },
-  { round: 6, type: "typing", delay_days: 30 },
-  { round: 7, type: "typing", delay_days: 90 }
+
+  {
+    round: 0,
+    type: "multiple choice",
+    delay_days: 0
+  },
+
+  {
+    round: 1,
+    type: "hangman",
+    delay_days: 0
+  },
+
+  {
+    round: 2,
+    type: "typing",
+    delay_days: 1
+  },
+
+  {
+    round: 3,
+    type: "typing",
+    delay_days: 3
+  },
+
+  {
+    round: 4,
+    type: "typing",
+    delay_days: 7
+  },
+
+  {
+    round: 5,
+    type: "typing",
+    delay_days: 14
+  },
+
+  {
+    round: 6,
+    type: "typing",
+    delay_days: 30
+  },
+
+  {
+    round: 7,
+    type: "typing",
+    delay_days: 90
+  }
+
 ];
 
 
-// Add status and round flags
+
+////////////////////////////////////////////////////////////
+// GLOBAL STATE
+////////////////////////////////////////////////////////////
+
+let cards = [];
 
 let currentCardIndex = 0;
-const cardToDotMap = {};
-
-const cardContainer = document.getElementById("card-container");
-const optionsContainer = document.getElementById("options-container");
-const nextBtn = document.getElementById("next-btn");
-const progressBar = document.getElementById("progress-bar");
 
 let batchIndex = 0;
+
 let batches = [];
+
 const BATCH_SIZE = 25;
 
+let currentLesson = null;
 
 
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-function getRandomOptions(correct, allOptions, count = 3) {
-  // Filter for current lesson
-  const lessonOptions = allOptions.filter(opt => opt.lesson === correct.lesson);
-  let pool = lessonOptions.length >= (count + 1) ? lessonOptions : allOptions;
-
-  const others = pool
-    .filter(opt => opt.back !== correct.back)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, count);
-
-  return shuffle([...others, correct]);
-}
-
-function initProgressBar() {
-  progressBar.innerHTML = "";
-  cards.forEach((card, index) => {
-    const dot = document.createElement("div");
-    dot.classList.add("progress-segment");
-    if (index === 0) dot.classList.add("active");
-    dot.setAttribute("data-back", card.back);
-    progressBar.appendChild(dot);
-    cardToDotMap[card.back] = dot;
-  });
-}
-
-
-function updateActiveDot(card) {
-  document.querySelectorAll(".progress-segment").forEach(dot => {
-    dot.classList.remove("active");
-  });
-
-  const dot = cardToDotMap[card.back];
-  if (dot) {
-    dot.classList.add("active");
-  }
-}
-
-
-
-function reorderProgressBar() {
-  cards.forEach(card => {
-    const dot = cardToDotMap[card.back];
-    if (dot) {
-      progressBar.appendChild(dot);
-    }
-  });
-
-  // ✅ Update active dot based on currently visible card
-  if (cards[currentCardIndex]) {
-    updateActiveDot(cards[currentCardIndex]);
-  }
-}
-
-function getPromotedRound(currentRound, lastSeenDate) {
-  const now = new Date();
-  const daysElapsed = Math.floor((now - new Date(lastSeenDate)) / (1000 * 60 * 60 * 24));
-
-  let newRound = currentRound;
-
-  for (let i = currentRound + 1; i <= roundConfiguration.length; i++) {
-    const previousCfg = roundConfiguration.find(r => r.round === i - 1);
-    if (previousCfg && previousCfg.delay_days <= daysElapsed) {
-      newRound = i;
-    } else {
-      break;
-    }
-  }
-
-  return newRound;
-}
-
-function updateDotColor(card) {
-  const dot = cardToDotMap[card.back];
-  if (!dot) return;
-
-  dot.classList.remove("correct", "incorrect", "multiple");
-
-  if (card.status === "typed-correct") {
-    dot.classList.add("correct"); // green = typed correct
-  } else if (card.status === "multiple-correct") {
-    dot.classList.add("multiple"); // yellow = multiple choice correct
-  } else if (card.status === "incorrect") {
-    dot.classList.add("incorrect"); // red = incorrect
-  }
-}
-
-function renderCard(card) {
-  cardContainer.classList.remove("hangman");
-  optionsContainer.classList.remove("hangman");
-
-  cardContainer.textContent = card.front;
-  optionsContainer.innerHTML = "";
-  
-
-const roundCfg = roundConfiguration.find(cfg => cfg.round === card.round);
-const isTypingRound = roundCfg && roundCfg.type === "typing";
-const isHangmanRound = roundCfg && roundCfg.type === "hangman";
-
-if (isHangmanRound) {
-  startHangmanGame({
-    cards: [card], // 👈 single card
-    getPromotedRound,
-    saveCardRound,
-    cardRound
-  });
-
-  nextBtn.style.display = "none"; // hide next (hangman controls flow)
-  return;
-}
-
-
-  if (!isTypingRound || !isHangmanRound) {
-  // MULTIPLE CHOICE ROUND
-  const options = getRandomOptions(card, vocabulary);
-  optionsContainer.setAttribute('round', 'multiple-choice');
-  
-  let hasMadeMistake = false;
-
-  options.forEach(option => {
-    const input = document.createElement("input");
-    const label = document.createElement("label");
-
-    const id = `cb-${Math.random()}`;
-    input.type = "checkbox";
-    input.id = id;
-    label.htmlFor = id;
-    label.textContent = option.back;
-
-    input.onclick = () => {
-  const isCorrect = option.back === card.back;
-
-  if (input.disabled) return; // prevent any further clicks on this option
-
-  input.disabled = true; // disable only this one after click
-
-if (isCorrect) {
-  if (!hasMadeMistake) {
-    card.status = "multiple-correct";
-
-    if (card.round < roundConfiguration.length) {
-      card.round = 1;
-    }
-
-    card.lastSeen = new Date().toISOString();
-
-    cardRound[card.back] = {
-      round: card.round,
-      lastSeen: card.lastSeen
-    };
-    saveCardRound(cardRound);
-
-    setTimeout(() => {
-      cards.push(card); // reinsert at end
-      reorderProgressBar();
-    }, 300);
-  } else {
-    // ❌ User clicked correct after a wrong — do not update round or save
-    card.status = "incorrect";
-    setTimeout(() => {
-      const insertAt = Math.min(currentCardIndex + 4, cards.length);
-      cards.splice(insertAt, 0, card);
-      reorderProgressBar();
-    }, 300);
-  }
-
-  updateDotColor(card);
-  input.classList.add("right");
-  nextBtn.disabled = false;
-} else {
-  hasMadeMistake = true;
-  card.status = "incorrect";
-  updateDotColor(card);
-  input.classList.add("wrong");
-}
-
-};
-
-
-    optionsContainer.append(input, label);
-  });
-}
- else {
-// TYPING ROUND
-  if (typeof card.madeMistakeThisSession === "undefined") {
-    card.madeMistakeThisSession = false;
-  }
-const input = document.createElement("input");
-optionsContainer.setAttribute('round', 'typing');
-input.type = "text";
-input.placeholder = "Type the answer...";
-input.className = "typing-input";
-
-const checkBtn = document.createElement("button");
-checkBtn.textContent = "prüfen";
-checkBtn.className = "check-btn";
-    
-function normalizeInputLenient(str) {
-  // for counting real mistakes (ignore accents)
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove accents
-    .replace(/[’‘]/g, "'")
-    .replace(/["“”]/g, '"')
-    .toLowerCase()
-    .trim();
-}
-
-function normalizeInputStrict(str) {
-  // for feedback & display — keep accents
-  return str
-    .replace(/[’‘]/g, "'")
-    .replace(/["“”]/g, '"')
-    .toLowerCase()
-    .trim();
-}
-
-function levenshtein(a, b) {
-  const matrix = Array.from({ length: a.length + 1 }, (_, i) =>
-    Array.from({ length: b.length + 1 }, (_, j) =>
-      i === 0 ? j : j === 0 ? i : 0
-    )
-  );
-
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = 1 + Math.min(
-          matrix[i - 1][j],     // deletion
-          matrix[i][j - 1],     // insertion
-          matrix[i - 1][j - 1]  // substitution
-        );
-      }
-    }
-  }
-
-  return matrix[a.length][b.length];
-}
-
-function normalizeQuotes(str) {
-  return str
-    .replace(/[’‘]/g, "'")
-    .replace(/["“”]/g, '"')
-    .toLowerCase()
-    .trim();
-}
-
-function checkAnswer() {
-  const userAnswer = input.value;
-  const correctAnswer = card.back;
-
-const normalizedUserLenient = normalizeInputLenient(userAnswer);
-  const normalizedCorrectLenient = normalizeInputLenient(correctAnswer);
-
-  const normalizedUserStrict = normalizeInputStrict(userAnswer);
-  const normalizedCorrectStrict = normalizeInputStrict(correctAnswer);
-
-  const distanceLenient = levenshtein(normalizedUserLenient, normalizedCorrectLenient);
-  const distanceStrict = levenshtein(normalizedUserStrict, normalizedCorrectStrict);
-
-  const isPerfect = distanceStrict === 0;
-  const isCloseEnough = distanceLenient <= 2;
-
-  const isRealMistake = distanceLenient > 2; // ← ignores accent issues
-
-
-  const isCorrect = isPerfect || isCloseEnough;
-
-  if (isCorrect) {
-    if (!card.madeMistakeThisSession && isRealMistake) {
-      card.madeMistakeThisSession = true; // only count real spelling/word errors
-    }
-
-    if (!card.madeMistakeThisSession) {
-      if (card.round==1) {
-        card.round = Math.min(card.round + 1, roundConfiguration.length);
-        console.log("update round 295");
-        
-      } 
-      else {
-        card.round = getPromotedRound(card.round, card.lastSeen);
-        console.log("update round 299");
-      }
-    }
-
-
-
-    card.lastSeen = new Date().toISOString();
-
-    cardRound[card.back] = {
-      round: card.round,
-      lastSeen: card.lastSeen
-    };
-    saveCardRound(cardRound);
-
-    card.status = "typed-correct";
-    checkBtn.classList.add("right");
-    checkBtn.classList.add("checked");
-    updateDotColor(card);
-
-    if (!isPerfect) {
-      const feedback = document.createElement("div");
-      feedback.className = "feedback";
-      feedback.textContent = `Close enough! Correct: ${card.back}`;
-      optionsContainer.appendChild(feedback);
-    }
-
-  } else {
-    card.status = "incorrect";
-    card.madeMistakeThisSession = true;
-
-    checkBtn.classList.add("wrong");
-    checkBtn.classList.add("checked");
-    updateDotColor(card);
-
-    const feedback = document.createElement("div");
-    feedback.className = "feedback";
-    feedback.textContent = `Correct answer: ${card.back}`;
-    optionsContainer.appendChild(feedback);
-
-    setTimeout(() => {
-      cards.splice(currentCardIndex + 4, 0, card);
-      reorderProgressBar();
-    }, 300);
-  }
-
-  input.disabled = true;
-  checkBtn.disabled = true;
-  nextBtn.disabled = false;
-}
-
-
-checkBtn.onclick = checkAnswer;
-
-input.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !checkBtn.disabled) {
-    checkAnswer();
-  }
-});
-
-optionsContainer.appendChild(input);
-optionsContainer.appendChild(checkBtn);
-input.focus();
-
-  }
-}
-
-function loadBatch(index) {
-  cards = batches[index] || [];
-  currentCardIndex = 0;
-  Object.keys(cardToDotMap).forEach(key => delete cardToDotMap[key]);
-  initProgressBar();
-  if (cards.length > 0) {
-    showNextCard();
-    nextBtn.style.display = "";
-  } else {
-    cardContainer.textContent = "No cards due!";
-    optionsContainer.innerHTML = "";
-    nextBtn.style.display = "none";
-  }
-}
-
-function showNextCard() {
-  if (currentCardIndex >= cards.length) {
-         // Batch complete
-    cardContainer.textContent = batchIndex === batches.length - 1
-      ? "Session complete!"
-      : "You have completed the first batch.";
-    optionsContainer.innerHTML = "";
-    
-    // Show continue button if more batches remain
-    if (batchIndex < batches.length - 1) {
-      let continueBtn = document.createElement("button");
-      continueBtn.textContent = "Continue";
-      continueBtn.className = "continue-btn";
-      continueBtn.onclick = function() {
-        batchIndex++;
-        loadBatch(batchIndex);
-        nextBtn.style.display = "";
-      };
-      optionsContainer.appendChild(continueBtn);
-      nextBtn.style.display = "none";
-    } else {
-      nextBtn.style.display = "none";
-    }
-    return;
-  }
-  const currentCard = cards[currentCardIndex];
-  console.log("Rendering card:", currentCard);
-  renderCard(currentCard);
-  updateActiveDot(currentCard);
-  reorderProgressBar();
-  nextBtn.disabled = true;
-  currentCardIndex++;
-}
-
-nextBtn.addEventListener("click", showNextCard);
-
-document.addEventListener("hangmanFinished", () => {
-  const previousCard = cards[currentCardIndex - 1];
-
-  if (previousCard) {
-    updateDotColor(previousCard); // ✅ update progress color
-  }
-  cardContainer.classList.remove("hangman");
-  optionsContainer.classList.remove("hangman");
-  nextBtn.style.display = "";
-  showNextCard(); // continue normal flow
-});
-
-
-
-
-//////////////////////////////////// save card round to local storage ///////////////
-let db;
+const cardToDotMap = {};
+
+
+
+////////////////////////////////////////////////////////////
+// DOM REFERENCES
+////////////////////////////////////////////////////////////
+
+const cardContainer =
+  document.getElementById("card-container");
+
+const optionsContainer =
+  document.getElementById("options-container");
+
+const nextBtn =
+  document.getElementById("next-btn");
+
+const progressBar =
+  document.getElementById("progress-bar");
+
+
+
+////////////////////////////////////////////////////////////
+// STARTUP HELPERS
+////////////////////////////////////////////////////////////
+
+checkAndUpdateCache();
+
+setupLanguageButtons();
+
+////////////////////////////////////////////////////////////
+// INDEXED DB STORAGE
+////////////////////////////////////////////////////////////
+
+let db = null;
+
+let cardRound = {};
+
+
 
 function openDatabase() {
+
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("FlashcardsDB", 1);
 
-    request.onupgradeneeded = function (event) {
+    const request =
+      indexedDB.open("FlashcardsDB", 1);
+
+
+    request.onupgradeneeded = event => {
+
       db = event.target.result;
+
+
       if (!db.objectStoreNames.contains("CardRounds")) {
-        db.createObjectStore("CardRounds", { keyPath: "back" });
+
+        db.createObjectStore(
+          "CardRounds",
+          {
+            keyPath: "back"
+          }
+        );
+
       }
+
     };
 
-    request.onsuccess = function (event) {
+
+    request.onsuccess = event => {
+
       db = event.target.result;
+
       resolve();
+
     };
 
-    request.onerror = function () {
-      reject("Failed to open IndexedDB");
+
+    request.onerror = () => {
+
+      reject(
+        new Error(
+          "Failed to open IndexedDB"
+        )
+      );
+
     };
+
+
   });
+
 }
 
 
 
 function loadCardRound() {
+
   return new Promise((resolve, reject) => {
-    if (!db) return resolve({});
 
-    const tx = db.transaction("CardRounds", "readonly");
-    const store = tx.objectStore("CardRounds");
-    const request = store.getAll();
 
-    request.onsuccess = function () {
+    if (!db) {
+
+      resolve({});
+
+      return;
+
+    }
+
+
+    const transaction =
+      db.transaction(
+        "CardRounds",
+        "readonly"
+      );
+
+
+    const store =
+      transaction.objectStore(
+        "CardRounds"
+      );
+
+
+    const request =
+      store.getAll();
+
+
+
+    request.onsuccess = () => {
+
+
       const result = {};
+
+
       request.result.forEach(entry => {
+
         result[entry.back] = {
+
           round: entry.round,
+
           lastSeen: entry.lastSeen
+
         };
+
       });
-      console.log("474 return load", result);
+
+
       resolve(result);
+
+
     };
 
-    request.onerror = function () {
-      reject("Failed to load cardRound from IndexedDB");
+
+    request.onerror = () => {
+
+      reject(
+        new Error(
+          "Failed loading card progress"
+        )
+      );
+
     };
+
+
   });
+
 }
 
 
-function saveCardRound(roundObj) {
-  if (!db) return;
 
-  const tx = db.transaction("CardRounds", "readwrite");
-  const store = tx.objectStore("CardRounds");
+function saveCardRound(roundObject) {
 
-  for (const [back, data] of Object.entries(roundObj)) {
-    store.put({ back, ...data });
+
+  if (!db) {
+
+    console.warn(
+      "Database not ready"
+    );
+
+    return;
+
   }
 
-  tx.oncomplete = () => {
-    console.log("Saved cardRound to IndexedDB");
+
+
+  const transaction =
+    db.transaction(
+      "CardRounds",
+      "readwrite"
+    );
+
+
+  const store =
+    transaction.objectStore(
+      "CardRounds"
+    );
+
+
+
+  Object.entries(roundObject)
+    .forEach(([back, data]) => {
+
+
+      store.put({
+
+        back,
+
+        round: data.round,
+
+        lastSeen: data.lastSeen
+
+      });
+
+
+    });
+
+
+
+  transaction.oncomplete = () => {
+
+    console.log(
+      "Progress saved"
+    );
+
   };
 
-  tx.onerror = () => {
-    console.error("Failed to save cardRound to IndexedDB");
+
+  transaction.onerror = error => {
+
+    console.error(
+      "Saving progress failed",
+      error
+    );
+
   };
+
+
 }
+
+
+
+
+////////////////////////////////////////////////////////////
+// CARD ROUND LOGIC
+////////////////////////////////////////////////////////////
+
+
+function getPromotedRound(
+  currentRound,
+  lastSeenDate
+) {
+
+
+  if (!lastSeenDate) {
+
+    return currentRound;
+
+  }
+
+
+  const now = new Date();
+
+
+  const elapsedDays =
+    Math.floor(
+      (
+        now -
+        new Date(lastSeenDate)
+      )
+      /
+      (
+        1000 *
+        60 *
+        60 *
+        24
+      )
+    );
+
+
+
+  let newRound = currentRound;
+
+
+
+  for (
+    let round = currentRound + 1;
+    round <= roundConfiguration.length - 1;
+    round++
+  ) {
+
+
+    const previous =
+      roundConfiguration.find(
+        cfg =>
+          cfg.round === round - 1
+      );
+
+
+    if (
+      previous &&
+      previous.delay_days <= elapsedDays
+    ) {
+
+      newRound = round;
+
+    } else {
+
+      break;
+
+    }
+
+  }
+
+
+  return newRound;
+
+}
+
+
+
 
 
 function isCardDue(card) {
-  const roundCfg = roundConfiguration.find(r => r.round === card.round);
-  if (!roundCfg) return true;
 
-  // Round 0 & 1 cards are always due
-  if (card.round === 0 || card.round === 1) return true;
 
-  if (!card.lastSeen) return true; // If the card has never been answered, it's due
+  const config =
+    roundConfiguration.find(
+      cfg =>
+        cfg.round === card.round
+    );
 
-  const lastSeenDate = new Date(card.lastSeen);
-  const now = new Date();
-  const isSameDay = lastSeenDate.toDateString() === now.toDateString();
 
-  // For round 2 or beyond, check if the card was answered today
-  if (card.round >= 2 && isSameDay) {
-    return false; // It shouldn't be due if it was answered today
+  if (!config) {
+
+    return true;
+
   }
 
-  const nextDueDate = new Date(lastSeenDate.getTime() + roundCfg.delay_days * 24 * 60 * 60 * 1000);
-  return now >= nextDueDate;
+
+
+  // New cards
+  if (
+    card.round === 0 ||
+    card.round === 1
+  ) {
+
+    return true;
+
+  }
+
+
+
+  if (!card.lastSeen) {
+
+    return true;
+
+  }
+
+
+
+  const lastSeen =
+    new Date(card.lastSeen);
+
+
+  const now =
+    new Date();
+
+
+
+  const sameDay =
+    lastSeen.toDateString()
+    === now.toDateString();
+
+
+
+  // Already studied today
+  if (
+    card.round >= 2 &&
+    sameDay
+  ) {
+
+    return false;
+
+  }
+
+
+
+  const nextDate =
+    new Date(
+      lastSeen.getTime()
+      +
+      config.delay_days *
+      24 *
+      60 *
+      60 *
+      1000
+    );
+
+
+  return now >= nextDate;
+
 }
 
 
 
 
-let cardRound = {};
+////////////////////////////////////////////////////////////
+// CREATE CARDS WITH SAVED PROGRESS
+////////////////////////////////////////////////////////////
 
-openDatabase()
-  .then(initVocabulary)
-  .then(loadCardRound)
-  .then((loaded) => {
-    cardRound = loaded;
 
-    let allCards = vocabulary.map(card => {
-      const saved = cardRound[card.back] || {};
-      return {
-        ...card,
-        round: saved.round ?? 0,
-        lastSeen: saved.lastSeen || null,
-        status: null
-      };
-    });
+function applySavedProgress(card) {
 
-    cards = shuffle(allCards.filter(isCardDue));
-    loadBatch(batchIndex);
-    showDashboard();
+
+  const saved =
+    cardRound[card.back]
+    ||
+    {};
+
+
+
+  return {
+
+    ...card,
+
+    round:
+      saved.round ?? 0,
+
+
+    lastSeen:
+      saved.lastSeen || null,
+
+
+    status:
+      null
+
+  };
+
+}
+
+
+
+
+async function initializeCards() {
+
+
+  let allCards =
+    vocabulary.map(
+      applySavedProgress
+    );
+
+
+
+  cards =
+    shuffle(
+      allCards.filter(
+        isCardDue
+      )
+    );
+
+
+
+  console.log(
+    "Due cards:",
+    cards.length
+  );
+
+
+}
+
+
+
+////////////////////////////////////////////////////////////
+// SHUFFLE HELPER
+////////////////////////////////////////////////////////////
+
+
+function shuffle(array) {
+
+  return array
+    .sort(
+      () =>
+        Math.random() - 0.5
+    );
+
+}
+
+
+
+////////////////////////////////////////////////////////////
+// INITIAL LOAD PIPELINE
+////////////////////////////////////////////////////////////
+
+
+async function initializeAppData() {
+
+
+  await openDatabase();
+
+
+  await initVocabulary();
+
+
+  cardRound =
+    await loadCardRound();
+
+
+
+  await initializeCards();
+
+
+}
+
+
+////////////////////////////////////////////////////////////
+// MULTIPLE CHOICE HELPERS
+////////////////////////////////////////////////////////////
+
+function getRandomOptions(correct, allOptions, count = 3) {
+
+
+  const lessonOptions =
+    allOptions.filter(
+      option =>
+        option.lesson === correct.lesson
+    );
+
+
+  const pool =
+    lessonOptions.length >= count + 1
+      ? lessonOptions
+      : allOptions;
+
+
+
+  const wrongAnswers =
+    pool
+      .filter(
+        option =>
+          option.back !== correct.back
+      )
+      .sort(
+        () =>
+          Math.random() - 0.5
+      )
+      .slice(
+        0,
+        count
+      );
+
+
+
+  return shuffle([
+    ...wrongAnswers,
+    correct
+  ]);
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+// PROGRESS DOTS
+////////////////////////////////////////////////////////////
+
+function initProgressBar() {
+
+
+  if (!progressBar) return;
+
+
+  progressBar.innerHTML = "";
+
+
+  Object.keys(cardToDotMap)
+    .forEach(
+      key =>
+        delete cardToDotMap[key]
+    );
+
+
+
+  cards.forEach(
+    (card, index) => {
+
+
+      const dot =
+        document.createElement(
+          "div"
+        );
+
+
+      dot.classList.add(
+        "progress-segment"
+      );
+
+
+      if (index === 0) {
+
+        dot.classList.add(
+          "active"
+        );
+
+      }
+
+
+
+      dot.dataset.back =
+        card.back;
+
+
+
+      progressBar.appendChild(dot);
+
+
+      cardToDotMap[card.back] =
+        dot;
+
+
+    }
+  );
+
+
+}
+
+
+
+function updateActiveDot(card) {
+
+
+  document
+    .querySelectorAll(
+      ".progress-segment"
+    )
+    .forEach(
+      dot =>
+        dot.classList.remove(
+          "active"
+        )
+    );
+
+
+
+  const dot =
+    cardToDotMap[card.back];
+
+
+
+  if (dot) {
+
+    dot.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+
+function updateDotColor(card) {
+
+
+  const dot =
+    cardToDotMap[card.back];
+
+
+  if (!dot) return;
+
+
+
+  dot.classList.remove(
+    "correct",
+    "incorrect",
+    "multiple"
+  );
+
+
+
+  if (
+    card.status === "typed-correct"
+  ) {
+
+    dot.classList.add(
+      "correct"
+    );
+
+
+  } else if (
+    card.status === "multiple-correct"
+  ) {
+
+    dot.classList.add(
+      "multiple"
+    );
+
+
+  } else if (
+    card.status === "incorrect"
+  ) {
+
+    dot.classList.add(
+      "incorrect"
+    );
+
+  }
+
+}
+
+
+
+
+function reorderProgressBar() {
+
+
+  if (!progressBar) return;
+
+
+
+  cards.forEach(card => {
+
+
+    const dot =
+      cardToDotMap[card.back];
+
+
+    if (dot) {
+
+      progressBar.appendChild(dot);
+
+    }
+
   });
 
 
-let allCards = vocabulary.map(card => {
-  const saved = cardRound[card.back] || {};
-  return {
-    ...card,
-    round: saved.round ?? 0,
-    lastSeen: saved.lastSeen || null,
-    status: null
-  };
-});
 
-// ✅ Only keep cards that are due
-//let cards = shuffle(allCards.filter(isCardDue));
-let cards = shuffle(allCards.filter(card => {
-  const due = isCardDue(card);
-  if (!due) {
-    console.log(`Skipping not-due card: ${card.back} | Round ${card.round} | Last seen ${card.lastSeen}`);
+}
+
+
+
+////////////////////////////////////////////////////////////
+// ANSWER NORMALIZATION
+////////////////////////////////////////////////////////////
+
+
+function normalizeLenient(text) {
+
+
+  return text
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    )
+    .replace(
+      /[’‘]/g,
+      "'"
+    )
+    .replace(
+      /["“”]/g,
+      '"'
+    )
+    .toLowerCase()
+    .trim();
+
+}
+
+
+
+function normalizeStrict(text) {
+
+
+  return text
+    .replace(
+      /[’‘]/g,
+      "'"
+    )
+    .replace(
+      /["“”]/g,
+      '"'
+    )
+    .toLowerCase()
+    .trim();
+
+}
+
+
+
+
+function levenshtein(a, b) {
+
+
+  const matrix =
+    Array.from(
+      {
+        length:
+          a.length + 1
+      },
+      () =>
+        Array(
+          b.length + 1
+        )
+        .fill(0)
+    );
+
+
+
+  for (
+    let i = 0;
+    i <= a.length;
+    i++
+  ) {
+
+    matrix[i][0] = i;
+
   }
-  return due;
-}));
 
-async function loadVocabulary(lesson) {
-  currentLesson = lesson;
-  batchIndex = 0;
-  const cardRound = await loadCardRound();
 
-  let allCards = vocabulary
-    .filter(card => card.lesson === lesson)
-    .map(card => {
-      const saved = cardRound[card.back] || {};
-      return {
-        ...card,
-        round: saved.round ?? 0,
-        lastSeen: saved.lastSeen || null,
-        status: null
-      };
+
+  for (
+    let j = 0;
+    j <= b.length;
+    j++
+  ) {
+
+    matrix[0][j] = j;
+
+  }
+
+
+
+  for (
+    let i = 1;
+    i <= a.length;
+    i++
+  ) {
+
+
+    for (
+      let j = 1;
+      j <= b.length;
+      j++
+    ) {
+
+
+      if (
+        a[i - 1] === b[j - 1]
+      ) {
+
+        matrix[i][j] =
+          matrix[i - 1][j - 1];
+
+      } else {
+
+        matrix[i][j] =
+          Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + 1
+          );
+
+      }
+
+    }
+
+  }
+
+
+  return matrix[a.length][b.length];
+
+}
+
+
+
+////////////////////////////////////////////////////////////
+// SAVE CARD RESULT
+////////////////////////////////////////////////////////////
+
+function updateCardProgress(card) {
+
+
+  cardRound[card.back] = {
+
+    round:
+      card.round,
+
+
+    lastSeen:
+      card.lastSeen
+
+  };
+
+
+  saveCardRound(cardRound);
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+// RENDER CARD
+////////////////////////////////////////////////////////////
+
+function renderCard(card) {
+
+
+  cardContainer.classList.remove(
+    "hangman"
+  );
+
+
+  optionsContainer.classList.remove(
+    "hangman"
+  );
+
+
+
+  cardContainer.textContent =
+    card.front;
+
+
+  optionsContainer.innerHTML =
+    "";
+
+
+
+  const config =
+    roundConfiguration.find(
+      cfg =>
+        cfg.round === card.round
+    );
+
+
+
+  const isHangman =
+    config?.type === "hangman";
+
+
+  const isTyping =
+    config?.type === "typing";
+
+
+
+
+  if (isHangman) {
+
+
+    startHangmanGame({
+
+      cards: [card],
+
+      getPromotedRound,
+
+      saveCardRound,
+
+      cardRound
+
     });
 
-  let dueCards = shuffle(allCards.filter(card => {
-    const due = isCardDue(card);
-    if (!due) {
-      console.log(`Skipping not-due card: ${card.back} | Round ${card.round} | Last seen ${card.lastSeen}`);
-    }
-    return due;
-  }));
 
-  console.log("Vocabulary loaded and shuffled:", dueCards);
 
-  batches = [];
-  for (let i = 0; i < dueCards.length; i += BATCH_SIZE) {
-    batches.push(dueCards.slice(i, i + BATCH_SIZE));
+    nextBtn.style.display =
+      "none";
+
+
+    return;
+
   }
 
-  loadBatch(batchIndex);
+
+
+
+  if (!isTyping) {
+
+
+    renderMultipleChoice(card);
+
+
+  } else {
+
+
+    renderTyping(card);
+
+  }
+
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+// MULTIPLE CHOICE
+////////////////////////////////////////////////////////////
+
+function renderMultipleChoice(card) {
+
+
+  optionsContainer.setAttribute(
+    "round",
+    "multiple-choice"
+  );
+
+
+  let mistake = false;
+
+
+
+  const options =
+    getRandomOptions(
+      card,
+      vocabulary
+    );
+
+
+
+  options.forEach(option => {
+
+
+    const input =
+      document.createElement(
+        "input"
+      );
+
+
+    const label =
+      document.createElement(
+        "label"
+      );
+
+
+
+    input.type =
+      "checkbox";
+
+
+    label.textContent =
+      option.back;
+
+
+
+    input.onclick =
+      () => {
+
+
+        if (input.disabled)
+          return;
+
+
+        input.disabled =
+          true;
+
+
+
+        if (
+          option.back === card.back
+        ) {
+
+
+          if (!mistake) {
+
+
+            card.round = 1;
+
+
+            card.lastSeen =
+              new Date()
+              .toISOString();
+
+
+            card.status =
+              "multiple-correct";
+
+
+            updateCardProgress(card);
+
+
+          } else {
+
+
+            card.status =
+              "incorrect";
+
+          }
+
+
+
+          updateDotColor(card);
+
+
+          nextBtn.disabled =
+            false;
+
+
+
+        } else {
+
+
+          mistake = true;
+
+
+          card.status =
+            "incorrect";
+
+
+          updateDotColor(card);
+
+        }
+
+
+      };
+
+
+
+    optionsContainer.append(
+      input,
+      label
+    );
+
+
+  });
+
+}
+////////////////////////////////////////////////////////////
+// TYPING MODE
+////////////////////////////////////////////////////////////
+
+function renderTyping(card) {
+
+
+  optionsContainer.setAttribute(
+    "round",
+    "typing"
+  );
+
+
+
+  if (
+    typeof card.madeMistakeThisSession === "undefined"
+  ) {
+
+    card.madeMistakeThisSession = false;
+
+  }
+
+
+
+  const input =
+    document.createElement(
+      "input"
+    );
+
+
+  input.type =
+    "text";
+
+
+  input.placeholder =
+    "Type the answer...";
+
+
+  input.className =
+    "typing-input";
+
+
+
+  const checkButton =
+    document.createElement(
+      "button"
+    );
+
+
+  checkButton.textContent =
+    "prüfen";
+
+
+  checkButton.className =
+    "check-btn";
+
+
+
+  function checkAnswer() {
+
+
+    const userAnswer =
+      input.value;
+
+
+
+    const correctAnswer =
+      card.back;
+
+
+
+    const strictUser =
+      normalizeStrict(
+        userAnswer
+      );
+
+
+    const strictCorrect =
+      normalizeStrict(
+        correctAnswer
+      );
+
+
+
+    const lenientUser =
+      normalizeLenient(
+        userAnswer
+      );
+
+
+    const lenientCorrect =
+      normalizeLenient(
+        correctAnswer
+      );
+
+
+
+    const strictDistance =
+      levenshtein(
+        strictUser,
+        strictCorrect
+      );
+
+
+
+    const lenientDistance =
+      levenshtein(
+        lenientUser,
+        lenientCorrect
+      );
+
+
+
+    const perfect =
+      strictDistance === 0;
+
+
+
+    const closeEnough =
+      lenientDistance <= 2;
+
+
+
+    const realMistake =
+      lenientDistance > 2;
+
+
+
+    const correct =
+      perfect ||
+      closeEnough;
+
+
+
+
+    if (correct) {
+
+
+      if (
+        !card.madeMistakeThisSession &&
+        realMistake
+      ) {
+
+        card.madeMistakeThisSession =
+          true;
+
+      }
+
+
+
+
+      if (
+        !card.madeMistakeThisSession
+      ) {
+
+
+        if (
+          card.round === 1
+        ) {
+
+
+          card.round = 2;
+
+
+        } else {
+
+
+          card.round =
+            getPromotedRound(
+              card.round,
+              card.lastSeen
+            );
+
+
+        }
+
+
+      }
+
+
+
+
+      card.lastSeen =
+        new Date()
+        .toISOString();
+
+
+
+      card.status =
+        "typed-correct";
+
+
+
+      updateCardProgress(card);
+
+
+      updateDotColor(card);
+
+
+
+      checkButton.classList.add(
+        "right"
+      );
+
+
+      if (!perfect) {
+
+
+        const feedback =
+          document.createElement(
+            "div"
+          );
+
+
+        feedback.className =
+          "feedback";
+
+
+        feedback.textContent =
+          `Close enough! Correct: ${card.back}`;
+
+
+        optionsContainer.appendChild(
+          feedback
+        );
+
+      }
+
+
+
+
+    } else {
+
+
+      card.status =
+        "incorrect";
+
+
+      card.madeMistakeThisSession =
+        true;
+
+
+
+      updateDotColor(card);
+
+
+
+      checkButton.classList.add(
+        "wrong"
+      );
+
+
+
+      const feedback =
+        document.createElement(
+          "div"
+        );
+
+
+      feedback.className =
+        "feedback";
+
+
+      feedback.textContent =
+        `Correct answer: ${card.back}`;
+
+
+      optionsContainer.appendChild(
+        feedback
+      );
+
+
+
+      // Put card back later
+      setTimeout(() => {
+
+
+        const insertPosition =
+          Math.min(
+            currentCardIndex + 4,
+            cards.length
+          );
+
+
+        cards.splice(
+          insertPosition,
+          0,
+          card
+        );
+
+
+        reorderProgressBar();
+
+
+      }, 300);
+
+
+
+    }
+
+
+
+    input.disabled =
+      true;
+
+
+    checkButton.disabled =
+      true;
+
+
+    nextBtn.disabled =
+      false;
+
+
+
+  }
+
+
+
+
+  checkButton.onclick =
+    checkAnswer;
+
+
+
+  input.addEventListener(
+    "keydown",
+    event => {
+
+
+      if (
+        event.key === "Enter" &&
+        !checkButton.disabled
+      ) {
+
+        checkAnswer();
+
+      }
+
+    }
+  );
+
+
+
+  optionsContainer.append(
+    input,
+    checkButton
+  );
+
+
+
+  input.focus();
+
+}
+
+
+
+////////////////////////////////////////////////////////////
+// CARD NAVIGATION
+////////////////////////////////////////////////////////////
+
+function showNextCard() {
+
+
+  if (
+    currentCardIndex >= cards.length
+  ) {
+
+
+    cardContainer.textContent =
+      "Session complete!";
+
+
+    optionsContainer.innerHTML =
+      "";
+
+
+    nextBtn.style.display =
+      "none";
+
+
+    return;
+
+  }
+
+
+
+
+  const card =
+    cards[currentCardIndex];
+
+
+
+  renderCard(card);
+
+
+
+  updateActiveDot(card);
+
+
+
+  nextBtn.disabled =
+    true;
+
+
+
+  currentCardIndex++;
+
+
+}
+
+
+
+function loadBatch(index) {
+
+
+  cards =
+    batches[index] || [];
+
+
+  currentCardIndex =
+    0;
+
+
+
+  initProgressBar();
+
+
+
+  if (
+    cards.length
+  ) {
+
+
+    nextBtn.style.display =
+      "";
+
+
+    showNextCard();
+
+
+
+  } else {
+
+
+    cardContainer.textContent =
+      "No cards due!";
+
+
+    optionsContainer.innerHTML =
+      "";
+
+
+    nextBtn.style.display =
+      "none";
+
+
+  }
+
+}
+
+
+
+
+if (nextBtn) {
+
+
+  nextBtn.addEventListener(
+    "click",
+    showNextCard
+  );
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+// HANGMAN RETURN EVENT
+////////////////////////////////////////////////////////////
+
+document.addEventListener(
+  "hangmanFinished",
+  () => {
+
+
+    const previousCard =
+      cards[currentCardIndex - 1];
+
+
+    if (previousCard) {
+
+      updateDotColor(
+        previousCard
+      );
+
+    }
+
+
+
+    nextBtn.style.display =
+      "";
+
+
+    showNextCard();
+
+
+  }
+);
+
+////////////////////////////////////////////////////////////
+// LESSON STUDY LOADING
+////////////////////////////////////////////////////////////
+
+export async function getDueCardsForLesson(lesson) {
+
+
+  const savedProgress =
+    await loadCardRound();
+
+
+
+  return shuffle(
+
+    vocabulary
+
+      .filter(
+        card =>
+          card.lesson === lesson
+      )
+
+      .map(card => {
+
+
+        const saved =
+          savedProgress[card.back]
+          ||
+          {};
+
+
+
+        return {
+
+          ...card,
+
+          round:
+            saved.round ?? 0,
+
+
+          lastSeen:
+            saved.lastSeen || null,
+
+
+          status:
+            null
+
+        };
+
+
+      })
+
+
+      .filter(isCardDue)
+
+  );
+
+
+}
+
+
+
+
+
+async function loadVocabulary(lesson) {
+
+
+  currentLesson =
+    lesson;
+
+
+  batchIndex =
+    0;
+
+
+
+  const dueCards =
+    await getDueCardsForLesson(
+      lesson
+    );
+
+
+
+  batches = [];
+
+
+
+  for (
+    let i = 0;
+    i < dueCards.length;
+    i += BATCH_SIZE
+  ) {
+
+
+    batches.push(
+      dueCards.slice(
+        i,
+        i + BATCH_SIZE
+      )
+    );
+
+
+  }
+
+
+
+  loadBatch(
+    batchIndex
+  );
+
 
   showStudyMode();
 
-  // Check if study mode is visible
-  console.log("Study mode display:", document.getElementById('study-mode').style.display);
-  // Check if cards are present
-  console.log("Cards in batch:", batches[batchIndex]);
+
 }
 
-// Attach event listeners to study buttons
-document.querySelectorAll('.study-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const lesson = this.getAttribute('data-lesson');
-    loadVocabulary(lesson);
-  });
-});
+
+
+
+
+////////////////////////////////////////////////////////////
+// DASHBOARD PROGRESS
+////////////////////////////////////////////////////////////
+
 
 async function updateLessonProgressBars() {
-  // Get card round info from localStorage
-  const cardRound = await loadCardRound();
 
-  // For each lesson card
-  document.querySelectorAll('.card[data-lesson]').forEach(cardEl => {
-    const lesson = cardEl.getAttribute('data-lesson');
-    // All vocab for this lesson
-    const lessonVocab = vocabulary.filter(v => v.lesson === lesson);
-    const total = lessonVocab.length;
 
-    // For each round 1-7
-    for (let round = 1; round <= 7; round++) {
-      // Count how many words are at this round or higher
-      const completed = lessonVocab.filter(v => {
-        const saved = cardRound[v.back];
-        return saved && (saved.round ?? 0) >= round;
-      }).length;
-      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const progress =
+    await loadCardRound();
 
-      // Find the progress bar for this round
-      const track = cardEl.querySelector(`.progress-track[data-round="${round}"] .progress-fill`);
-      if (track) {
-        track.style.width = percent + "%";
+
+
+  document
+    .querySelectorAll(
+      ".card[data-lesson]"
+    )
+    .forEach(cardElement => {
+
+
+      const lesson =
+        cardElement.dataset.lesson;
+
+
+
+      const lessonCards =
+        vocabulary.filter(
+          card =>
+            card.lesson === lesson
+        );
+
+
+
+      const total =
+        lessonCards.length;
+
+
+
+      for (
+        let round = 1;
+        round <= 7;
+        round++
+      ) {
+
+
+
+        const completed =
+          lessonCards.filter(card => {
+
+
+            const saved =
+              progress[card.back];
+
+
+
+            return (
+              saved &&
+              saved.round >= round
+            );
+
+
+          })
+          .length;
+
+
+
+        const percent =
+          total
+            ? Math.round(
+                completed / total * 100
+              )
+            : 0;
+
+
+
+
+        const bar =
+          cardElement.querySelector(
+            `.progress-track[data-round="${round}"] .progress-fill`
+          );
+
+
+
+        if (bar) {
+
+          bar.style.width =
+            percent + "%";
+
+        }
+
+
       }
-    }
-  });
-}
-
-async function showDashboard() {
-  document.querySelector('.dashboard').style.display = '';
-  document.getElementById('study-mode').style.display = 'none';
-
-  const audioMode = document.getElementById('audio-mode');
-  if (audioMode) {
-    audioMode.style.display = 'none';
-  }
-
-  updateLessonProgressBars();
-}
-
-async function showStudyMode() {
-  document.querySelector('.dashboard').style.display = 'none';
-  document.getElementById('study-mode').style.display = '';
-}
-
-function showAudioMode() {
-  document.querySelector('.dashboard').style.display = 'none';
-  document.getElementById('study-mode').style.display = 'none';
-}
-
-// Close study mode and return to dashboard
-document.getElementById('close-study').addEventListener('click', function() {
-  showDashboard();
-  // Optionally clear study mode UI
-  document.getElementById('card-container').textContent = '';
-  document.getElementById('options-container').innerHTML = '';
-  document.getElementById('progress-bar').innerHTML = '';
-  document.getElementById('next-btn').disabled = true;
-});
-
-const closeAudioBtn = document.getElementById('close-audio');
-
-if (closeAudioBtn) {
-  closeAudioBtn.addEventListener('click', () => {
-    showDashboard();
-
-    const cardContainer = document.getElementById('card-container');
-    const optionsContainer = document.getElementById('options-container');
-    const pauseBtn = document.getElementById('pause-btn');
-    const nextBtn = document.getElementById('next-btn');
-
-    if (cardContainer) cardContainer.textContent = '';
-    if (optionsContainer) optionsContainer.innerHTML = '';
-    if (pauseBtn) pauseBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
-  });
-}
-
-// On page load, show dashboard and hide study mode
-showDashboard();
-
-let currentLesson; 
-
-// Export progress
-document.getElementById('export-btn').addEventListener('click', async () => {
-  const cardRound = await loadCardRound();
-  const dataStr = JSON.stringify(cardRound, null, 2);
-  const blob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'vocab-progress.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
-
-// Show file picker for import
-document.getElementById('import-btn').addEventListener('click', () => {
-  document.getElementById('import-input').click();
-});
-
-// Import progress
-document.getElementById('import-input').addEventListener('change', async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-  const text = await file.text();
-  try {
-    const imported = JSON.parse(text);
-    await openDatabase();
-    saveCardRound(imported);
-    alert('Fortschritt importiert! Die Seite wird нова загружена.');
-    location.reload();
-  } catch (e) {
-    alert('Fehler beim Importieren der файла.');
-  }
-});
-
-// Filter lessons by level
-function showLessonsForLevel(level) {
-  document.querySelectorAll('.card[data-lesson]').forEach(card => {
-    const lesson = card.getAttribute('data-lesson');
-    let show = false;
-    if (level === 'A1.1') {
-      show = /^A1\.[1-7]$/.test(lesson);
-    } else if (level === 'A1.2') {
-      show = /^A1\.(8|9|10|11|12|13|14)$/.test(lesson);
-    } else if (level === 'A2.1') {
-      show = /^A2\.[1-7]$/.test(lesson);
-    } else if (level === 'A2.2') {
-      show = /^A2\.(8|9|10|11|12|13|14)$/.test(lesson);
-    } else if (level === 'B1.1') {
-      show = /^B1\.[1-7]$/.test(lesson);
-    } else if (level === 'B1.2') {
-      show = /^B1\.(8|9|10|11|12|13|14)$/.test(lesson);
-    } else if (level === 'B2.1') {
-      show = /^B2\.[1-6]$/.test(lesson);
-    } else if (level === 'B2.2') {
-      show = /^B2\.(7|8|9|10|11|12)$/.test(lesson);
-    } else if (level === 'fr') {
-      show = lesson.startsWith('fr.');
-    }
-    card.style.display = show ? '' : 'none';
-  });
-}
-
-// Helper to get/set last selected level
-function getSavedLevel() {
-  return localStorage.getItem('selectedLevel');
-}
-function saveLevel(level) {
-  localStorage.setItem('selectedLevel', level);
-}
-
-// Show lessons for saved or default level
-let initialLevel = getSavedLevel() || null;
-if (initialLevel) {
-  showLessonsForLevel(initialLevel);
-  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.querySelector(`.level-btn[data-level="${initialLevel}"]`);
-  if (btn) btn.classList.add('active');
-} else {
-  // No saved level: open menu for user to choose
-  document.getElementById('menu-modal').style.display = 'flex';
-}
-
-// Add event listeners to level buttons
-document.querySelectorAll('.level-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    // Remove .active from all buttons
-    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-    // Add .active to the clicked button
-    this.classList.add('active');
-    showLessonsForLevel(this.getAttribute('data-level'));
-
-    if (isFrenchMode) {
-      saveLevel('fr');
-      showLessonsForLevel('fr');
-
-      document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-      const frBtn = document.querySelector('.level-btn[data-level="fr"]');
-      if (frBtn) frBtn.classList.add('active');
-    }
 
 
-    saveLevel(this.getAttribute('data-level'));
-    // Close menu after selection
-    document.getElementById('menu-modal').style.display = 'none';
-  });
-});
 
-document.getElementById('menu-btn').addEventListener('click', () => {
-  console.log("open Menu");
-  document.getElementById('menu-modal').style.display = 'flex';
-});
-document.getElementById('close-menu').addEventListener('click', () => {
-  console.log("close menu");
-  document.getElementById('menu-modal').style.display = 'none';
-});
-
-
-////////////////////////////////////////////////////////////
-// 🎧 AUDIO BUTTON LISTENER
-////////////////////////////////////////////////////////////
-
-document.querySelectorAll('.audio-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const lesson = this.getAttribute('data-lesson');
-
-    showAudioMode();
-
-    startAudioMode(lesson, vocabulary);
-  });
-});
-
-document.querySelectorAll('.memory-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const lesson = this.getAttribute('data-lesson');
-
-    const lessonVocab = vocabulary.filter(card => card.lesson === lesson);
-
-    startMemoryGame(lessonVocab);
-  });
-});
-
-document.querySelectorAll('.hangman-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    console.log("Hangman button clicked");
-
-        // ✅ ADD THIS GUARD HERE
-    if (!Object.keys(cardRound).length) {
-      alert("Please wait, progress is still loading...");
-      return;
-    }
-
-    const lesson = btn.getAttribute('data-lesson');
-
-    // Filter lesson cards based on the selected lesson
-    const lessonCards = vocabulary
-      .filter(card => card.lesson === lesson)
-      .map(card => {
-        const saved = cardRound[card.back] || {};
-        return {
-          ...card,
-          round: saved.round ?? 0,
-          lastSeen: saved.lastSeen || null
-        };
-      })
-      .filter(card => isCardDue(card)); // Ensure card is due for review
-
-    console.log("Hangman cards:", lessonCards);
-
-    if (!lessonCards.length) {
-      alert("No due cards for Hangman!");
-      return;
-    }
-
-    // Now you pass an object with `cards` to startHangmanGame
-    startHangmanGame({
-      cards: lessonCards,
-      getPromotedRound,
-      saveCardRound,
-      cardRound
     });
 
-    showStudyMode();
-  });
-});
 
-export { getPromotedRound, saveCardRound, loadCardRound, showDashboard };
-export function getVocabularyForLesson(lesson) {
-  return vocabulary.filter(card => card.lesson === lesson);
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// SCREEN SWITCHING
+////////////////////////////////////////////////////////////
+
+
+async function showDashboard() {
+
+
+  const dashboard =
+    document.querySelector(
+      ".dashboard"
+    );
+
+
+  const study =
+    document.getElementById(
+      "study-mode"
+    );
+
+
+  const audio =
+    document.getElementById(
+      "audio-mode"
+    );
+
+
+
+  if (dashboard)
+    dashboard.style.display = "";
+
+
+
+  if (study)
+    study.style.display = "none";
+
+
+
+  if (audio)
+    audio.style.display = "none";
+
+
+
+  updateLessonProgressBars();
+
+
+}
+
+
+
+
+async function showStudyMode() {
+
+
+  const dashboard =
+    document.querySelector(
+      ".dashboard"
+    );
+
+
+  const study =
+    document.getElementById(
+      "study-mode"
+    );
+
+
+
+  if (dashboard)
+    dashboard.style.display =
+      "none";
+
+
+
+  if (study)
+    study.style.display =
+      "";
+
+}
+
+
+
+function showAudioMode() {
+
+
+  const dashboard =
+    document.querySelector(
+      ".dashboard"
+    );
+
+
+  const study =
+    document.getElementById(
+      "study-mode"
+    );
+
+
+
+  const audio =
+    document.getElementById(
+      "audio-mode"
+    );
+
+
+
+  if (dashboard)
+    dashboard.style.display =
+      "none";
+
+
+  if (study)
+    study.style.display =
+      "none";
+
+
+  if (audio)
+    audio.style.display =
+      "";
+
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// CLOSE STUDY BUTTON
+////////////////////////////////////////////////////////////
+
+const closeStudy =
+  document.getElementById(
+    "close-study"
+  );
+
+
+
+if (closeStudy) {
+
+
+  closeStudy.addEventListener(
+    "click",
+    () => {
+
+
+      showDashboard();
+
+
+
+      if (cardContainer)
+        cardContainer.textContent =
+          "";
+
+
+
+      if (optionsContainer)
+        optionsContainer.innerHTML =
+          "";
+
+
+
+      if (progressBar)
+        progressBar.innerHTML =
+          "";
+
+
+
+      if (nextBtn)
+        nextBtn.disabled =
+          true;
+
+
+    }
+  );
+
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// CLOSE AUDIO BUTTON
+////////////////////////////////////////////////////////////
+
+const closeAudio =
+  document.getElementById(
+    "close-audio"
+  );
+
+
+
+if (closeAudio) {
+
+
+  closeAudio.addEventListener(
+    "click",
+    () => {
+
+
+      showDashboard();
+
+
+
+      const pause =
+        document.getElementById(
+          "pause-btn"
+        );
+
+
+
+      if (pause)
+        pause.disabled =
+          true;
+
+
+
+      if (cardContainer)
+        cardContainer.textContent =
+          "";
+
+
+
+      if (optionsContainer)
+        optionsContainer.innerHTML =
+          "";
+
+
+    }
+  );
+
+
+}
+
+
+
+
+////////////////////////////////////////////////////////////
+// STUDY BUTTONS
+////////////////////////////////////////////////////////////
+
+
+document
+  .querySelectorAll(
+    ".study-btn"
+  )
+  .forEach(button => {
+
+
+    button.addEventListener(
+      "click",
+      () => {
+
+
+        const lesson =
+          button.dataset.lesson;
+
+
+
+        loadVocabulary(
+          lesson
+        );
+
+
+      }
+    );
+
+
+  });
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// AUDIO BUTTONS
+////////////////////////////////////////////////////////////
+
+
+document
+  .querySelectorAll(
+    ".audio-btn"
+  )
+  .forEach(button => {
+
+
+    button.addEventListener(
+      "click",
+      () => {
+
+
+        const lesson =
+          button.dataset.lesson;
+
+
+
+        showAudioMode();
+
+
+
+        startAudioMode(
+          lesson
+        );
+
+
+      }
+    );
+
+
+  });
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// MEMORY BUTTONS
+////////////////////////////////////////////////////////////
+
+
+document
+  .querySelectorAll(
+    ".memory-btn"
+  )
+  .forEach(button => {
+
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+
+        const lesson =
+          button.dataset.lesson;
+
+
+
+        const lessonCards =
+          await getDueCardsForLesson(
+            lesson
+          );
+
+
+
+        startMemoryGame(
+          lessonCards
+        );
+
+
+      }
+    );
+
+
+  });
+////////////////////////////////////////////////////////////
+// LEVEL FILTERING
+////////////////////////////////////////////////////////////
+
+function showLessonsForLevel(level) {
+
+
+  document
+    .querySelectorAll(
+      ".card[data-lesson]"
+    )
+    .forEach(card => {
+
+
+      const lesson =
+        card.dataset.lesson;
+
+
+      let visible = false;
+
+
+
+      switch(level) {
+
+
+        case "A1.1":
+          visible =
+            /^A1\.[1-7]$/
+            .test(lesson);
+          break;
+
+
+        case "A1.2":
+          visible =
+            /^A1\.(8|9|10|11|12|13|14)$/
+            .test(lesson);
+          break;
+
+
+        case "A2.1":
+          visible =
+            /^A2\.[1-7]$/
+            .test(lesson);
+          break;
+
+
+        case "A2.2":
+          visible =
+            /^A2\.(8|9|10|11|12|13|14)$/
+            .test(lesson);
+          break;
+
+
+        case "B1.1":
+          visible =
+            /^B1\.[1-7]$/
+            .test(lesson);
+          break;
+
+
+        case "B1.2":
+          visible =
+            /^B1\.(8|9|10|11|12|13|14)$/
+            .test(lesson);
+          break;
+
+
+        case "B2.1":
+          visible =
+            /^B2\.[1-6]$/
+            .test(lesson);
+          break;
+
+
+        case "B2.2":
+          visible =
+            /^B2\.(7|8|9|10|11|12)$/
+            .test(lesson);
+          break;
+
+
+        case "fr":
+          visible =
+            lesson.startsWith("fr.");
+          break;
+
+
+      }
+
+
+
+      card.style.display =
+        visible ? "" : "none";
+
+
+    });
+
+
+}
+
+
+
+function getSavedLevel() {
+
+  return localStorage.getItem(
+    "selectedLevel"
+  );
+
+}
+
+
+
+function saveLevel(level) {
+
+  localStorage.setItem(
+    "selectedLevel",
+    level
+  );
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// LEVEL MENU
+////////////////////////////////////////////////////////////
+
+function setupLevelMenu() {
+
+
+  const saved =
+    getSavedLevel();
+
+
+
+  if (saved) {
+
+
+    showLessonsForLevel(
+      saved
+    );
+
+
+    document
+      .querySelectorAll(
+        ".level-btn"
+      )
+      .forEach(btn =>
+        btn.classList.remove(
+          "active"
+        )
+      );
+
+
+
+    const active =
+      document.querySelector(
+        `.level-btn[data-level="${saved}"]`
+      );
+
+
+    if (active)
+      active.classList.add(
+        "active"
+      );
+
+
+
+  } else {
+
+
+    const menu =
+      document.getElementById(
+        "menu-modal"
+      );
+
+
+    if (menu)
+      menu.style.display =
+        "flex";
+
+
+  }
+
+
+
+
+
+  document
+    .querySelectorAll(
+      ".level-btn"
+    )
+    .forEach(button => {
+
+
+      button.addEventListener(
+        "click",
+        () => {
+
+
+          let level =
+            button.dataset.level;
+
+
+
+          if (isFrenchMode) {
+
+            level = "fr";
+
+          }
+
+
+
+          saveLevel(
+            level
+          );
+
+
+          showLessonsForLevel(
+            level
+          );
+
+
+
+          document
+            .querySelectorAll(
+              ".level-btn"
+            )
+            .forEach(btn =>
+              btn.classList.remove(
+                "active"
+              )
+            );
+
+
+
+          button.classList.add(
+            "active"
+          );
+
+
+
+          const menu =
+            document.getElementById(
+              "menu-modal"
+            );
+
+
+          if (menu)
+            menu.style.display =
+              "none";
+
+
+        }
+      );
+
+
+    });
+
+
+}
+
+
+
+
+const menuButton =
+  document.getElementById(
+    "menu-btn"
+  );
+
+
+if (menuButton) {
+
+
+  menuButton.addEventListener(
+    "click",
+    () => {
+
+
+      const menu =
+        document.getElementById(
+          "menu-modal"
+        );
+
+
+      if (menu)
+        menu.style.display =
+          "flex";
+
+
+    }
+  );
+
+
+}
+
+
+
+const closeMenu =
+  document.getElementById(
+    "close-menu"
+  );
+
+
+if (closeMenu) {
+
+
+  closeMenu.addEventListener(
+    "click",
+    () => {
+
+
+      const menu =
+        document.getElementById(
+          "menu-modal"
+        );
+
+
+      if (menu)
+        menu.style.display =
+          "none";
+
+
+    }
+  );
+
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// HANGMAN BUTTONS
+////////////////////////////////////////////////////////////
+
+document
+  .querySelectorAll(
+    ".hangman-btn"
+  )
+  .forEach(button => {
+
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+
+        if (
+          !Object.keys(cardRound)
+            .length
+        ) {
+
+          alert(
+            "Please wait, progress is still loading..."
+          );
+
+          return;
+
+        }
+
+
+
+        const lesson =
+          button.dataset.lesson;
+
+
+
+        const lessonCards =
+          await getDueCardsForLesson(
+            lesson
+          );
+
+
+
+        if (!lessonCards.length) {
+
+
+          alert(
+            "No due cards for Hangman!"
+          );
+
+
+          return;
+
+        }
+
+
+
+        startHangmanGame({
+
+          cards:
+            lessonCards,
+
+
+          getPromotedRound,
+
+
+          saveCardRound,
+
+
+          cardRound
+
+        });
+
+
+
+        showStudyMode();
+
+
+
+      }
+    );
+
+
+  });
+
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// EXPORT PROGRESS
+////////////////////////////////////////////////////////////
+
+const exportButton =
+  document.getElementById(
+    "export-btn"
+  );
+
+
+
+if (exportButton) {
+
+
+  exportButton.addEventListener(
+    "click",
+    async () => {
+
+
+      const data =
+        await loadCardRound();
+
+
+
+      const blob =
+        new Blob(
+          [
+            JSON.stringify(
+              data,
+              null,
+              2
+            )
+          ],
+          {
+            type:
+              "application/json"
+          }
+        );
+
+
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+
+      link.href =
+        url;
+
+
+      link.download =
+        "vocab-progress.json";
+
+
+      link.click();
+
+
+
+      URL.revokeObjectURL(
+        url
+      );
+
+
+    }
+  );
+
+
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// IMPORT PROGRESS
+////////////////////////////////////////////////////////////
+
+const importButton =
+  document.getElementById(
+    "import-btn"
+  );
+
+
+const importInput =
+  document.getElementById(
+    "import-input"
+  );
+
+
+
+if (
+  importButton &&
+  importInput
+) {
+
+
+  importButton.addEventListener(
+    "click",
+    () => {
+
+      importInput.click();
+
+    }
+  );
+
+
+
+  importInput.addEventListener(
+    "change",
+    async event => {
+
+
+      const file =
+        event.target.files[0];
+
+
+      if (!file)
+        return;
+
+
+
+      try {
+
+
+        const text =
+          await file.text();
+
+
+
+        const imported =
+          JSON.parse(
+            text
+          );
+
+
+
+        await openDatabase();
+
+
+
+        saveCardRound(
+          imported
+        );
+
+
+
+        alert(
+          "Fortschritt importiert!"
+        );
+
+
+
+        location.reload();
+
+
+
+      } catch(error) {
+
+
+        alert(
+          "Import fehlgeschlagen."
+        );
+
+
+      }
+
+
+    }
+  );
+
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// START APPLICATION
+////////////////////////////////////////////////////////////
+
+async function initApp() {
+
+
+  await initializeAppData();
+
+
+
+  setupLevelMenu();
+
+
+
+  initProgressBar();
+
+
+
+  showDashboard();
+
+
+
+}
+
+
+
+initApp();
+
+
+
+
+
+////////////////////////////////////////////////////////////
+// EXPORTS
+////////////////////////////////////////////////////////////
+
+export {
+  getPromotedRound,
+  saveCardRound,
+  loadCardRound,
+  showDashboard
+};
+
+
+
+export function getVocabularyForLesson(
+  lesson
+) {
+
+  return vocabulary.filter(
+    card =>
+      card.lesson === lesson
+  );
+
 }
