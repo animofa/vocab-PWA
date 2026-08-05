@@ -1,6 +1,6 @@
 // audio.js
 
-import { showDashboard } from "./app.js";
+import { showDashboard, getDueCardsForLesson } from "./app.js";
 
 const synth = window.speechSynthesis;
 
@@ -270,27 +270,25 @@ function stopAudioMode() {
 // 🚀 START
 ////////////////////////////////////////////////////////////
 
-function startAudioMode(lesson, vocabulary) {
-  // toggle behavior
+async function startAudioMode(lesson) {
   if (isAudioModeRunning) {
     stopAudioMode();
     return;
   }
 
-  const lessonCards = vocabulary.filter(card => card.lesson === lesson);
+  audioQueue = await getDueCardsForLesson(lesson);
 
-  if (!lessonCards.length) {
-    console.log("No vocabulary found for lesson:", lesson);
+  if (!audioQueue.length) {
+    console.log("No due vocabulary found for lesson:", lesson);
     return;
   }
 
-  audioQueue = lessonCards;
   currentAudioIndex = 0;
 
-createAudioModal();
-updateCurrentCard(audioQueue[0]);
+  createAudioModal();
+  updateCurrentCard(audioQueue[0]);
 
-runAudioQueue();
+  runAudioQueue();
 }
 
 export { startAudioMode };
